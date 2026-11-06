@@ -1,0 +1,411 @@
+{
+  "semester_info": {
+    "name": "2026-1",
+    "start_date": "2026-02-09",
+    "end_date": "2026-07-04",
+    "holidays": [
+      {
+        "date": "2026-02-16",
+        "title": "Carnaval"
+      },
+      {
+        "date": "2026-02-17",
+        "title": "Carnaval"
+      },
+      {
+        "date": "2026-04-03",
+        "title": "Sexta-feira Santa"
+      },
+      {
+        "date": "2026-04-21",
+        "title": "Tiradentes"
+      },
+      {
+        "date": "2026-05-01",
+        "title": "Dia do Trabalho"
+      },
+      {
+        "date": "2026-06-04",
+        "title": "Corpus Christi"
+      },
+      {
+        "date": "2026-09-07",
+        "title": "Independência do Brasil"
+      },
+      {
+        "date": "2026-10-12",
+        "title": "Nossa Sra. Aparecida"
+      },
+      {
+        "date": "2026-10-15",
+        "title": "Dia do Professor (Folga Fatec)"
+      },
+      {
+        "date": "2026-10-28",
+        "title": "Dia do Servidor Público"
+      },
+      {
+        "date": "2026-11-02",
+        "title": "Finados"
+      },
+      {
+        "date": "2026-11-15",
+        "title": "Proclamação da República"
+      },
+      {
+        "date": "2026-11-20",
+        "title": "Dia da Consciência Negra"
+      }
+    ]
+  },
+  "excuses": [
+    "Meu cachorro comeu meu bilhete único.",
+    "Deu conflito de merge no meu despertador hoje.",
+    "Fiquei preso num loop infinito tentando sair da cama.",
+    "O ônibus passou direto e levou minha vontade de estudar junto.",
+    "Tive que ficar em casa pra atualizar o Windows aos 99%.",
+    "A linha do trem quebrou e tive que voltar pra dormir.",
+    "Minha bateria social descarregou e a Fatec não tem tomada bivolt.",
+    "Deu NullPointerException na minha motivação nesta manhã.",
+    "O Oráculo da Falta me avisou que as estrelas do SIGA não recomendam sair de casa hoje.",
+    "Estou realizando testes de estresse no meu colchão.",
+    "Fui compilar o café da manhã e deu Timeout.",
+    "Fui dar git push na coragem e deu erro 403 Forbidden."
+  ],
+  "curriculums": {
+    "1": [
+      {
+        "code": "DWI01",
+        "name": "Desenv. Web I (Hélio Cesar)",
+        "dayOfWeek": 1,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "ALG01",
+        "name": "Algoritmos (Lúcio)",
+        "dayOfWeek": 1,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "DWI02",
+        "name": "Desenv. Web I (Hélio Cesar)",
+        "dayOfWeek": 2,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "MBD01",
+        "name": "Model. de Banco (Sueli Ap)",
+        "dayOfWeek": 2,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "SOP01",
+        "name": "Sistema Op (Silas / Ismael)",
+        "dayOfWeek": 3,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "ALG02",
+        "name": "Algoritmos (Lúcio)",
+        "dayOfWeek": 3,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "ES101",
+        "name": "Eng. Software I (Rháleff)",
+        "dayOfWeek": 4,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "DDG01",
+        "name": "Design Digital (Patricia)",
+        "dayOfWeek": 5,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      }
+    ],
+    "2": [
+      {
+        "code": "ES201",
+        "name": "Eng Software II (Luiz Antonio / Marco A)",
+        "dayOfWeek": 1,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "EDD01",
+        "name": "Estrutura Dados (Lucio)",
+        "dayOfWeek": 1,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "DW201",
+        "name": "Desenv. Web II (Bruno)",
+        "dayOfWeek": 2,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "EDD02",
+        "name": "Estrutura Dados (Lucio)",
+        "dayOfWeek": 3,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "MPC01",
+        "name": "Mat para Comp (Rosângela)",
+        "dayOfWeek": 3,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "TPI01",
+        "name": "Téc Prog I (Marcos Vasconcelos)",
+        "dayOfWeek": 4,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "BDR01",
+        "name": "Banco Dados Rel. (Rafael Miranda / Renan)",
+        "dayOfWeek": 5,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      }
+    ],
+    "3": [
+      {
+        "code": "IHC01",
+        "name": "Int. H. Computador (Lucio)",
+        "dayOfWeek": 1,
+        "classesPerDay": 2,
+        "maxAbsences": 10
+      },
+      {
+        "code": "GAG01",
+        "name": "Gestão Ágil (Bruno)",
+        "dayOfWeek": 1,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "BDN01",
+        "name": "Ban. Dados N Rel. (Floriano)",
+        "dayOfWeek": 2,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "DW301",
+        "name": "Desenv. Web III (Vinicius Heltai)",
+        "dayOfWeek": 3,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "ALG03",
+        "name": "Álgebra Linear (Rosângela)",
+        "dayOfWeek": 4,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "ING01",
+        "name": "Inglês I (Luciano / Valteir)",
+        "dayOfWeek": 5,
+        "classesPerDay": 2,
+        "maxAbsences": 10
+      },
+      {
+        "code": "TP201",
+        "name": "Téc Prog II (Vinicius)",
+        "dayOfWeek": 5,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      }
+    ],
+    "4": [
+      {
+        "code": "IOT01",
+        "name": "Internet Coisas (Rháleff)",
+        "dayOfWeek": 1,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "LDW01",
+        "name": "Lab. Des. Web (Edson)",
+        "dayOfWeek": 2,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "PDM01",
+        "name": "Prog. Disp Móveis I (Rafael Lopes)",
+        "dayOfWeek": 2,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "IEC01",
+        "name": "Int. Entrega Contínua (Rafael Lopes)",
+        "dayOfWeek": 3,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "EST01",
+        "name": "Estat. Aplicada (Diogo Soares)",
+        "dayOfWeek": 4,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "PDM02",
+        "name": "Prog. Disp Móveis I (Rafael lopes)",
+        "dayOfWeek": 4,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "ING02",
+        "name": "Inglês II (Luciano / Valteir)",
+        "dayOfWeek": 5,
+        "classesPerDay": 2,
+        "maxAbsences": 10
+      },
+      {
+        "code": "UX001",
+        "name": "Experiência Usuário (Carlo Ronny)",
+        "dayOfWeek": 5,
+        "classesPerDay": 2,
+        "maxAbsences": 10
+      }
+    ],
+    "5": [
+      {
+        "code": "FRT01",
+        "name": "F. Redação técnica (Thierri)",
+        "dayOfWeek": 1,
+        "classesPerDay": 2,
+        "maxAbsences": 10
+      },
+      {
+        "code": "ING03",
+        "name": "Inglês III (Amaury)",
+        "dayOfWeek": 1,
+        "classesPerDay": 2,
+        "maxAbsences": 10
+      },
+      {
+        "code": "CPN01",
+        "name": "Comp. Nuvem I (Odair / Renan)",
+        "dayOfWeek": 2,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "LDM01",
+        "name": "Lab. de Des. p/ Disp. Móveis (Carlo Ronny)",
+        "dayOfWeek": 3,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "PDM03",
+        "name": "Prog. Disp. Móv. II (Vinicius)",
+        "dayOfWeek": 3,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "SDA01",
+        "name": "Seg. D. Aplicações (Evandro / Ismael)",
+        "dayOfWeek": 4,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "PDM04",
+        "name": "Prog. Disp. Móv. II (Vinicius)",
+        "dayOfWeek": 5,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "APM01",
+        "name": "Aprendiz. Máquina (Rháleff / Marcelo)",
+        "dayOfWeek": 5,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      }
+    ],
+    "6": [
+      {
+        "code": "LDM02",
+        "name": "Lab. Desenv. Multip. (Rafael Guem / Renan)",
+        "dayOfWeek": 1,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "ETC01",
+        "name": "Ética (Janaina)",
+        "dayOfWeek": 2,
+        "classesPerDay": 2,
+        "maxAbsences": 10
+      },
+      {
+        "code": "MND01",
+        "name": "Mineração de Dados (Edson)",
+        "dayOfWeek": 2,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "MND02",
+        "name": "Mineração de Dados (Edson)",
+        "dayOfWeek": 3,
+        "classesPerDay": 2,
+        "maxAbsences": 20
+      },
+      {
+        "code": "QTS01",
+        "name": "Qual. e Testes SW (Edson)",
+        "dayOfWeek": 3,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "CN201",
+        "name": "Comp. Nuvem II (Renan)",
+        "dayOfWeek": 4,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "PLN01",
+        "name": "PLN (Andrea)",
+        "dayOfWeek": 5,
+        "classesPerDay": 4,
+        "maxAbsences": 20
+      },
+      {
+        "code": "ING04",
+        "name": "Inglês IV (Luciano / Valteir)",
+        "dayOfWeek": 5,
+        "classesPerDay": 2,
+        "maxAbsences": 10
+      }
+    ]
+  }
+}
