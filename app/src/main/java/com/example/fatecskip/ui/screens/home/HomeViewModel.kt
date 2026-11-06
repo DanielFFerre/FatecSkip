@@ -59,6 +59,36 @@ class HomeViewModel(
             )
             _verdict.value = result
             _isEvaluating.value = false
+
+            // Feedback sonoro sintético (Soneca Gamer)
+            val isDanger = result is SkipVerdict.ForbiddenCriticalEvent ||
+                    result is SkipVerdict.ForbiddenAbsenceLimit ||
+                    result is SkipVerdict.WarningSafetyMargin
+            com.example.fatecskip.util.SoundHelper.playVerdictSound(isDanger)
+        }
+    }
+
+    fun addCustomSubject(
+        code: String,
+        name: String,
+        semester: Int,
+        dayOfWeek: Int,
+        classesPerDay: Int,
+        maxAbsences: Int
+    ) {
+        viewModelScope.launch {
+            repository.addCustomSubject(
+                code = code,
+                name = name,
+                semester = semester,
+                dayOfWeek = dayOfWeek,
+                classesPerDay = classesPerDay,
+                maxAbsences = maxAbsences
+            )
+            _userFeedback.value = "Matéria de DP adicionada com sucesso no ${semester}º semestre!"
+            if (_verdict.value != null) {
+                consultOracle()
+            }
         }
     }
 

@@ -380,9 +380,9 @@ private fun StepCourage(
             "Equilíbrio clássico aos 75%. Passo de semestre sem passar sufoco e ainda durmo bem."
         ),
         Triple(
-            0.90f,
+            0.95f,
             "Modo Vida Loka 💀",
-            "Joga no limite aos 90%! Só avisa quando faltar 1 aula para ser eliminado pelo SIGA."
+            "Joga no limite absoluto aos 95%! Só avisa quando faltar 1 aula para ser eliminado sem Exame Final."
         )
     )
 

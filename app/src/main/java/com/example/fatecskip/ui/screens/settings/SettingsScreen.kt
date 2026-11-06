@@ -212,14 +212,14 @@ fun SettingsScreen(
             item {
                 val modeTitle = when {
                     sliderValue <= 0.6f -> "Modo Nerdola 🤓 (Alerta aos 50%)"
-                    sliderValue <= 0.8f -> "Estudante Médio 🎓 (Equilíbrio aos 75%)"
-                    else -> "Modo Vida Loka 💀 (Alerta aos 90%)"
+                    sliderValue <= 0.85f -> "Estudante Médio 🎓 (Equilíbrio aos 75%)"
+                    else -> "Modo Vida Loka 💀 (Alerta aos 95%)"
                 }
 
                 val modeDescription = when {
                     sliderValue <= 0.6f -> "Começa a apitar bem cedo. Menor risco de DP, mas menos horas de sono."
-                    sliderValue <= 0.8f -> "O clássico equilíbrio universitário entre passar de ano e não enlouquecer."
-                    else -> "Joga no limite! Só avisa quando faltar 1 aula para ser eliminado pelo SIGA."
+                    sliderValue <= 0.85f -> "O clássico equilíbrio universitário entre passar de ano e não enlouquecer."
+                    else -> "Joga no limite absoluto! Só avisa quando faltar 1 aula para ser eliminado pelo SIGA sem Exame Final."
                 }
 
                 Card(
@@ -257,8 +257,8 @@ fun SettingsScreen(
                             onValueChangeFinished = {
                                 viewModel.updateCourageLevel(sliderValue)
                             },
-                            valueRange = 0.50f..0.90f,
-                            steps = 3
+                            valueRange = 0.50f..0.95f,
+                            steps = 1
                         )
 
                         Row(
@@ -267,7 +267,7 @@ fun SettingsScreen(
                         ) {
                             Text(text = "50% (Nerdola)", style = MaterialTheme.typography.labelSmall)
                             Text(text = "75% (Médio)", style = MaterialTheme.typography.labelSmall)
-                            Text(text = "90% (Vida Loka)", style = MaterialTheme.typography.labelSmall)
+                            Text(text = "95% (Vida Loka)", style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }

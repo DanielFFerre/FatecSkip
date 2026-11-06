@@ -63,7 +63,8 @@ class DailyCheckWorker(
             }
 
             // 3. Checa matérias de amanhã com risco de limite
-            val tomorrowSubjects = database.subjectDao().getSubjectsBySemesterAndDay(semester, tomorrowDayOfWeek)
+            val allSemesterSubjects = database.subjectDao().getSubjectsBySemesterList(semester)
+            val tomorrowSubjects = allSemesterSubjects.filter { it.isClassOnDay(tomorrowDayOfWeek) }
             val dangerSubject = tomorrowSubjects.firstOrNull { subject ->
                 val threshold = (subject.maxAbsences * courageLevel).toInt()
                 (subject.currentAbsences + subject.classesPerDay) >= threshold

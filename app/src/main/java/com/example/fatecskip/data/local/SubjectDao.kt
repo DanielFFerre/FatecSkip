@@ -41,8 +41,17 @@ interface SubjectDao {
     @Query("UPDATE subjects SET currentAbsences = :absences WHERE id = :id")
     suspend fun updateAbsences(id: Long, absences: Int)
 
-    @Query("DELETE FROM subjects WHERE semester = :semester")
+    @Query("SELECT * FROM subjects WHERE isCustomized = 1 ORDER BY semester ASC, name ASC")
+    fun getCustomizedSubjects(): Flow<List<SubjectEntity>>
+
+    @Query("SELECT * FROM subjects WHERE isCustomized = 1")
+    suspend fun getCustomizedSubjectsList(): List<SubjectEntity>
+
+    @Query("DELETE FROM subjects WHERE semester = :semester AND isCustomized = 0")
     suspend fun clearSubjectsBySemester(semester: Int)
+
+    @Query("DELETE FROM subjects WHERE isCustomized = 0")
+    suspend fun clearAllNonCustomizedSubjects()
 
     @Query("DELETE FROM subjects")
     suspend fun clearAllSubjects()

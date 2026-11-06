@@ -67,6 +67,29 @@ class AcademicRepository(
         eventDao.deleteEventById(id)
     }
 
+    suspend fun addCustomSubject(
+        code: String,
+        name: String,
+        semester: Int,
+        dayOfWeek: Int,
+        classesPerDay: Int,
+        maxAbsences: Int
+    ): Long {
+        val extensionCodes = setOf("ES101", "ES201", "GAG01", "LDW01", "LDM01", "LDM02")
+        val subject = SubjectEntity(
+            code = code.uppercase().trim(),
+            name = name.trim(),
+            semester = semester,
+            dayOfWeek = dayOfWeek,
+            classesPerDay = classesPerDay,
+            currentAbsences = 0,
+            maxAbsences = maxAbsences,
+            isCustomized = true,
+            isExtension = extensionCodes.contains(code.uppercase().trim())
+        )
+        return subjectDao.insertSubject(subject)
+    }
+
     suspend fun getRandomExcuse(): String {
         val dbExcuse = excuseDao.getRandomExcuse()?.text
         if (!dbExcuse.isNullOrBlank()) return dbExcuse
@@ -105,8 +128,9 @@ class AcademicRepository(
             )
         }
 
-        // Matérias do dia
-        val subjectsToday = subjectDao.getSubjectsBySemesterAndDay(semester, dayOfWeek)
+        // Matérias do dia (suporta matérias de múltiplos dias como Terça e Quinta)
+        val allSemesterSubjects = subjectDao.getSubjectsBySemesterList(semester)
+        val subjectsToday = allSemesterSubjects.filter { it.isClassOnDay(dayOfWeek) }
         if (subjectsToday.isEmpty()) {
             val messages = listOf(
                 "Hoje não tem nenhuma aula cadastrada para o seu semestre (${semester}º). Pode maratonar série em paz!",
@@ -128,15 +152,23 @@ class AcademicRepository(
             return SkipVerdict.ForbiddenCriticalEvent(eventTitle, messages.random())
         }
 
-        // 3. Verificação de Limite de Faltas (Reprovação por Falta no SIGA - Regra 25%)
+        // 3. Verificação de Limite de Faltas (Reprovação por Falta no SIGA - Regra 25% + Perda de Exame Final)
         for (subject in subjectsToday) {
             val simulatedAbsences = subject.currentAbsences + subject.classesPerDay
             if (simulatedAbsences > subject.maxAbsences) {
-                val messages = listOf(
-                    "PROIBIDO FALTAR! Se faltar hoje, você REPROVA por falta no SIGA em '${subject.name}' ($simulatedAbsences/${subject.maxAbsences})!",
-                    "💀 PERIGO FATAL! Mais uma falta hoje e o SIGA cancela seu semestre em '${subject.name}'! Levanta dessa cama agora!",
-                    "NEM PENSE EM FALTAR! O fantasma da DP em '${subject.name}' já está puxando seu pé!"
-                )
+                val messages = if (subject.isExtension) {
+                    listOf(
+                        "PROIBIDO FALTAR! '${subject.name}' é DISCIPLINA EXTENSIONISTA OBRIGATÓRIA (PPC R-06). Faltar hoje te elimina do Exame Final e exige refazer 100% das 60h extensionistas!",
+                        "💀 PERIGO EXTENSIONISTA! '${subject.name}' não aceita regime domiciliar e exceder 25% de faltas causa reprovação direta no SIGA sem direito a Exame Final!",
+                        "NEM PENSE EM FALTAR! '${subject.name}' é componente extensionista. Faltar hoje te elimina sem recurso!"
+                    )
+                } else {
+                    listOf(
+                        "PROIBIDO FALTAR! Se faltar hoje em '${subject.name}', você REPROVA por falta ($simulatedAbsences/${subject.maxAbsences}). De acordo com a Portaria CGESG nº 06/2026, estourar 25% de faltas ELIMINA TOTALMENTE o direito ao Exame Final!",
+                        "💀 PERIGO FATAL! Mais uma falta hoje e o SIGA cancela seu semestre em '${subject.name}'! Sem direito a recurso ou Exame Final!",
+                        "NEM PENSE EM FALTAR! O fantasma da DP em '${subject.name}' já está puxando seu pé e a regra da Fatec não dá Exame Final para quem reprova por falta!"
+                    )
+                }
                 return SkipVerdict.ForbiddenAbsenceLimit(
                     subject.name,
                     subject.currentAbsences,
@@ -152,11 +184,19 @@ class AcademicRepository(
             val dangerThreshold = (subject.maxAbsences * courageLevel).toInt()
             val simulatedAbsences = subject.currentAbsences + subject.classesPerDay
             if (simulatedAbsences > dangerThreshold) {
-                val messages = listOf(
-                    "Por sua conta e risco! Sem provas hoje, mas faltar em '${subject.name}' vai te deixar a 1 passo de dar bom dia pro coordenador (${subject.currentAbsences}/${subject.maxAbsences}).",
-                    "CUIDADO, GUERREIRO! A corda tá esticando em '${subject.name}'. Vai mesmo gastar sua última carta na manga hoje?",
-                    "ZONA DE RISCO! Se faltar hoje em '${subject.name}', nas próximas semanas até dor de dente vai ter que virar atestado!"
-                )
+                val messages = if (subject.isExtension) {
+                    listOf(
+                        "ZONA DE RISCO EXTENSIONISTA! '${subject.name}' exige 10% da carga do curso (PPC R-06) e NÃO ACEITA REGIME DOMICILIAR. Se faltar hoje, o sufoco será duplo!",
+                        "CUIDADO EXTENSIONISTA! '${subject.name}' é matéria de extensão. Se estourar as faltas, terá que refazer todas as 60h práticas no semestre que vem!",
+                        "ATENÇÃO! '${subject.name}' está perto do limite (${subject.currentAbsences}/${subject.maxAbsences}). Disciplinas extensionistas não têm regime abonado!"
+                    )
+                } else {
+                    listOf(
+                        "Por sua conta e risco! Sem provas hoje, mas faltar em '${subject.name}' vai te deixar a 1 passo de perder o Exame Final (${subject.currentAbsences}/${subject.maxAbsences}). Lembre-se: atestados devem ser protocolados em até 5 dias corridos!",
+                        "CUIDADO, GUERREIRO! A corda tá esticando em '${subject.name}'. Se reprovar por falta, a Portaria da Fatec proíbe fazer Exame Final!",
+                        "ZONA DE RISCO! Se faltar hoje em '${subject.name}', nas próximas semanas até dor de dente vai precisar de atestado formal em até 5 dias úteis!"
+                    )
+                }
                 return SkipVerdict.WarningSafetyMargin(
                     subject.name,
                     subject.currentAbsences,
@@ -243,8 +283,8 @@ class AcademicRepository(
 
                 Result.success("Sincronização com a API concluída com sucesso! Grade e eventos atualizados.")
             } else {
-                // Fallback offline seguro com a grade oficial exata do PDF
-                subjectDao.clearAllSubjects()
+                // Fallback offline seguro com a grade oficial exata do PDF (preserva matérias de DP customizadas)
+                subjectDao.clearAllNonCustomizedSubjects()
                 subjectDao.insertSubjects(DefaultFatecData.getDefaultSubjects())
                 eventDao.clearHolidays()
                 eventDao.insertEvents(DefaultFatecData.getDefaultHolidays())

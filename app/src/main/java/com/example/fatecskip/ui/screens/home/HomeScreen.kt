@@ -28,20 +28,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -51,8 +55,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +71,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fatecskip.data.local.entities.SubjectEntity
 import com.example.fatecskip.domain.model.SkipVerdict
+import com.example.fatecskip.ui.theme.HolidayBlue
+import com.example.fatecskip.ui.theme.PanicRed
+import com.example.fatecskip.ui.theme.SafeGreen
+import com.example.fatecskip.ui.theme.WarningYellow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -79,6 +90,8 @@ fun HomeScreen(
     val verdict by viewModel.verdict.collectAsState()
     val isEvaluating by viewModel.isEvaluating.collectAsState()
     val feedbackMessage by viewModel.userFeedback.collectAsState()
+
+    var showAddDpDialog by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -144,23 +157,39 @@ fun HomeScreen(
                 }
             }
 
-            // Título da Seção de Matérias
+            // Título da Seção de Matérias + Botão de Adicionar DP
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Índice de Risco de DP",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "${subjects.size} matérias",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column {
+                        Text(
+                            text = "Índice de Risco de DP",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "${subjects.size} matérias cadastradas",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = { showAddDpDialog = true },
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PostAdd,
+                            contentDescription = "Adicionar DP",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "+ Matéria (DP)", fontSize = 12.sp)
+                    }
                 }
             }
 
@@ -208,6 +237,17 @@ fun HomeScreen(
             }
         }
     }
+
+    if (showAddDpDialog) {
+        AddDpSubjectDialog(
+            currentSemester = semester,
+            onDismiss = { showAddDpDialog = false },
+            onConfirm = { code, name, sem, day, classesPerDay, maxAbsences ->
+                viewModel.addCustomSubject(code, name, sem, day, classesPerDay, maxAbsences)
+                showAddDpDialog = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -226,7 +266,7 @@ private fun HeaderCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
@@ -247,7 +287,7 @@ private fun HeaderCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Bora pra Fatec ou bora continuar dormindo?",
+                text = "SIGA na Cama • Fatec Diadema",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -260,7 +300,7 @@ private fun HeaderCard(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = "${semester}º Semestre",
+                        text = "${semester}º Semestre Base",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
@@ -295,7 +335,7 @@ private fun OracleButtonCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -312,7 +352,7 @@ private fun OracleButtonCard(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Cruze os dados com o SIGA e descubra se a sua cama foi autorizada hoje.",
+                text = "Cruze suas faltas com o Regulamento CEETEPS e saiba se sua cama foi autorizada hoje.",
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -373,7 +413,6 @@ private fun VerdictCard(
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-            // Top Row: Emoji + Badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -416,7 +455,6 @@ private fun VerdictCard(
                 lineHeight = 22.sp
             )
 
-            // Seção de Desculpa Sugerida (Verde e Amarelo)
             verdict.suggestedExcuse?.let { excuse ->
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
@@ -492,24 +530,18 @@ private fun SubjectItemCard(
     onDecrement: () -> Unit
 ) {
     val progress = (subject.currentAbsences.toFloat() / subject.maxAbsences.toFloat()).coerceIn(0f, 1f)
-    val dayName = when (subject.dayOfWeek) {
-        1 -> "Segunda"
-        2 -> "Terça"
-        3 -> "Quarta"
-        4 -> "Quinta"
-        5 -> "Sexta"
-        6 -> "Sábado"
-        else -> "Dia livre"
-    }
 
     val progressColor by animateColorAsState(
         targetValue = when {
-            progress < 0.5f -> Color(0xFF2E7D32) // Verde
-            progress < 0.8f -> Color(0xFFF57C00) // Laranja
-            else -> Color(0xFFD32F2F) // Vermelho
+            progress < 0.5f -> SafeGreen
+            progress < 0.8f -> WarningYellow
+            else -> PanicRed
         },
         label = "progressColor"
     )
+
+    // Formatação Monospace de HP de Faltas (Ex: 04/20)
+    val formattedHp = String.format("%02d/%02d", subject.currentAbsences, subject.maxAbsences)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -530,28 +562,70 @@ private fun SubjectItemCard(
                 verticalAlignment = Alignment.Top
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = subject.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "${subject.code} • $dayName • ${subject.classesPerDay} aulas/dia",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = subject.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${subject.code} • ${subject.getFormattedDays()} • ${subject.classesPerDay} aulas/dia",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        if (subject.isExtension) {
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = WarningYellow.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = "EXTENSIONISTA",
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = WarningYellow,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        if (subject.isCustomized) {
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = HolidayBlue.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = "DP",
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = HolidayBlue,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
                 }
 
-                // Faltas Badge
+                // Faltas Badge Monospace Gamer
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = progressColor.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = "${subject.currentAbsences}/${subject.maxAbsences} faltas",
+                        text = "$formattedHp faltas",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = progressColor
                     )
@@ -560,7 +634,7 @@ private fun SubjectItemCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Barra de Progresso do Risco de DP
+            // Barra de Progresso Gamer (HP de faltas)
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
@@ -580,8 +654,8 @@ private fun SubjectItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (progress >= 0.8f) "💀 Risco iminente de DP" else if (progress >= 0.5f) "⚠️ Fique atento" else "✅ Situação segura",
-                    style = MaterialTheme.typography.labelSmall,
+                    text = if (progress >= 0.8f) "💀 Sem Exame Final se estourar" else if (progress >= 0.5f) "⚠️ Zona de atenção" else "✅ Faltas sob controle",
+                    style = MaterialTheme.typography.bodySmall,
                     color = progressColor,
                     fontWeight = FontWeight.Medium
                 )
@@ -633,3 +707,141 @@ private fun SubjectItemCard(
     }
 }
 
+@Composable
+private fun AddDpSubjectDialog(
+    currentSemester: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (code: String, name: String, semester: Int, dayOfWeek: Int, classesPerDay: Int, maxAbsences: Int) -> Unit
+) {
+    var code by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var targetSemester by remember { mutableIntStateOf(currentSemester) }
+    var dayOfWeek by remember { mutableIntStateOf(1) }
+    var is80Hours by remember { mutableStateOf(true) } // true = 80h (4 aulas/dia), false = 40h (2 aulas/dia)
+
+    val days = listOf(
+        1 to "Segunda",
+        2 to "Terça",
+        3 to "Quarta",
+        4 to "Quinta",
+        5 to "Sexta",
+        6 to "Sábado"
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Adicionar Matéria de DP / Contraturno 🎒",
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Cadastre disciplinas que você está cursando de outros semestres. Elas ficarão salvas e protegidas no SQLite.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                OutlinedTextField(
+                    value = code,
+                    onValueChange = { code = it },
+                    label = { Text("Código (Ex: IBD002 ou DP01)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nome da Matéria (Ex: Banco de Dados Rel.)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text(
+                    text = "Semestre em que está matriculado:",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    (1..6).forEach { sem ->
+                        FilterChip(
+                            selected = targetSemester == sem,
+                            onClick = { targetSemester = sem },
+                            label = { Text("${sem}º") }
+                        )
+                    }
+                }
+
+                Text(
+                    text = "Dia da Semana da Aula:",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    days.forEach { (dInt, dName) ->
+                        FilterChip(
+                            selected = dayOfWeek == dInt,
+                            onClick = { dayOfWeek = dInt },
+                            label = { Text(dName.take(3)) }
+                        )
+                    }
+                }
+
+                Text(
+                    text = "Carga Horária / Aulas por Dia:",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = is80Hours,
+                        onClick = { is80Hours = true },
+                        label = { Text("80h (4 aulas/dia • Max 20 faltas)") }
+                    )
+                    FilterChip(
+                        selected = !is80Hours,
+                        onClick = { is80Hours = false },
+                        label = { Text("40h (2 aulas/dia • Max 10 faltas)") }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (name.isNotBlank()) {
+                        val classes = if (is80Hours) 4 else 2
+                        val maxAbs = if (is80Hours) 20 else 10
+                        val cd = if (code.isBlank()) "DP${(10..99).random()}" else code
+                        onConfirm(cd, name, targetSemester, dayOfWeek, classes, maxAbs)
+                    }
+                },
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Adicionar DP")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
