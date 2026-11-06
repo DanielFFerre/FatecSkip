@@ -106,6 +106,13 @@ class SettingsViewModel(
         }
     }
 
+    fun resetOnboarding() {
+        viewModelScope.launch {
+            preferencesRepository.setOnboardingCompleted(false)
+            _feedbackMessage.value = "Configuração inicial redefinida! Abra o app novamente para vê-la."
+        }
+    }
+
     fun clearFeedback() {
         _feedbackMessage.value = null
     }

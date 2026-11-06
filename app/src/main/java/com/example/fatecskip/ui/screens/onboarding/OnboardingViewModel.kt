@@ -1,0 +1,72 @@
+package com.example.fatecskip.ui.screens.onboarding
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.fatecskip.data.preferences.UserPreferencesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+class OnboardingViewModel(
+    private val preferencesRepository: UserPreferencesRepository
+) : ViewModel() {
+
+    private val _currentStep = MutableStateFlow(1) // 1 = Apelido, 2 = Semestre, 3 = Coragem
+    val currentStep: StateFlow<Int> = _currentStep.asStateFlow()
+
+    private val _nickname = MutableStateFlow("")
+    val nickname: StateFlow<String> = _nickname.asStateFlow()
+
+    private val _selectedSemester = MutableStateFlow(1)
+    val selectedSemester: StateFlow<Int> = _selectedSemester.asStateFlow()
+
+    private val _courageLevel = MutableStateFlow(0.75f) // 0.50f (Nerdola), 0.75f (Médio), 0.90f (Vida Loka)
+    val courageLevel: StateFlow<Float> = _courageLevel.asStateFlow()
+
+    fun updateNickname(name: String) {
+        _nickname.value = name
+    }
+
+    fun selectSemester(sem: Int) {
+        _selectedSemester.value = sem
+    }
+
+    fun selectCourageLevel(level: Float) {
+        _courageLevel.value = level
+    }
+
+    fun nextStep() {
+        if (_currentStep.value < 3) {
+            _currentStep.value += 1
+        }
+    }
+
+    fun prevStep() {
+        if (_currentStep.value > 1) {
+            _currentStep.value -= 1
+        }
+    }
+
+    fun finishOnboarding(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            val nameToSave = _nickname.value.ifBlank { "Guerreiro da Fatec" }
+            preferencesRepository.setStudentNickname(nameToSave)
+            preferencesRepository.setSelectedSemester(_selectedSemester.value)
+            preferencesRepository.setCourageLevel(_courageLevel.value)
+            preferencesRepository.setOnboardingCompleted(true)
+            onSuccess()
+        }
+    }
+
+    class Factory(
+        private val preferencesRepository: UserPreferencesRepository
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return OnboardingViewModel(preferencesRepository) as T
+        }
+    }
+}
+

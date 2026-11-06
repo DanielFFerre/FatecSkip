@@ -27,6 +27,7 @@ class UserPreferencesRepository(private val context: Context) {
         val KEY_STUDENT_NICKNAME = stringPreferencesKey("student_nickname")
         val KEY_NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val KEY_API_URL = stringPreferencesKey("api_url")
+        val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 
         const val DEFAULT_SEMESTER = 1
         const val DEFAULT_COURAGE_LEVEL = 0.75f // Estudante Médio
@@ -73,6 +74,20 @@ class UserPreferencesRepository(private val context: Context) {
         .map { preferences ->
             preferences[KEY_API_URL] ?: DEFAULT_API_URL
         }
+
+    val isOnboardingCompletedFlow: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences ->
+            preferences[KEY_ONBOARDING_COMPLETED] ?: false
+        }
+
+    suspend fun setOnboardingCompleted(completed: Boolean = true) {
+        dataStore.edit { preferences ->
+            preferences[KEY_ONBOARDING_COMPLETED] = completed
+        }
+    }
 
     suspend fun setSelectedSemester(semester: Int) {
         dataStore.edit { preferences ->

@@ -1,7 +1,9 @@
 package com.example.fatecskip.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -10,7 +12,9 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -25,6 +29,8 @@ import com.example.fatecskip.ui.screens.events.EventsScreen
 import com.example.fatecskip.ui.screens.events.EventsViewModel
 import com.example.fatecskip.ui.screens.home.HomeScreen
 import com.example.fatecskip.ui.screens.home.HomeViewModel
+import com.example.fatecskip.ui.screens.onboarding.OnboardingScreen
+import com.example.fatecskip.ui.screens.onboarding.OnboardingViewModel
 import com.example.fatecskip.ui.screens.settings.SettingsScreen
 import com.example.fatecskip.ui.screens.settings.SettingsViewModel
 
@@ -37,6 +43,19 @@ fun AppNavHost(
     val repository = app.repository
     val preferencesRepository = app.preferencesRepository
 
+    val isOnboardingCompleted by preferencesRepository.isOnboardingCompletedFlow.collectAsState(initial = null)
+
+    // Se ainda estiver lendo o DataStore na inicialização, exibe tela de carregamento limpa
+    if (isOnboardingCompleted == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        return
+    }
+
     val homeViewModel: HomeViewModel = viewModel(
         factory = HomeViewModel.Factory(repository, preferencesRepository)
     )
@@ -46,8 +65,11 @@ fun AppNavHost(
     val settingsViewModel: SettingsViewModel = viewModel(
         factory = SettingsViewModel.Factory(repository, preferencesRepository)
     )
+    val onboardingViewModel: OnboardingViewModel = viewModel(
+        factory = OnboardingViewModel.Factory(preferencesRepository)
+    )
 
-    val items = listOf(
+    val bottomNavItems = listOf(
         Screen.Home,
         Screen.Events,
         Screen.Settings
@@ -56,55 +78,75 @@ fun AppNavHost(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val isFirstTime = isOnboardingCompleted == false
+    val startDestination = if (isFirstTime) Screen.Onboarding.route else Screen.Home.route
+
+    // Oculta a barra de navegação inferior durante a tela de Onboarding
+    val showBottomBar = currentRoute != Screen.Onboarding.route
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ) {
-                items.forEach { screen ->
-                    val isSelected = currentRoute == screen.route
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = screen.icon,
-                                contentDescription = screen.title
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = screen.title,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        selected = isSelected,
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        onClick = {
-                            if (currentRoute != screen.route) {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    bottomNavItems.forEach { screen ->
+                        val isSelected = currentRoute == screen.route
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    imageVector = screen.icon,
+                                    contentDescription = screen.title
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = screen.title,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
+                            selected = isSelected,
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            onClick = {
+                                if (currentRoute != screen.route) {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(
+                    viewModel = onboardingViewModel,
+                    onComplete = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Onboarding.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
             composable(Screen.Home.route) {
                 HomeScreen(viewModel = homeViewModel)
             }
@@ -117,4 +159,3 @@ fun AppNavHost(
         }
     }
 }
-

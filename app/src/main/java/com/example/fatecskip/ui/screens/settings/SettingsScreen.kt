@@ -147,6 +147,7 @@ fun SettingsScreen(
                                 value = nicknameInput,
                                 onValueChange = { nicknameInput = it },
                                 label = { Text("Seu apelido na sala") },
+                                placeholder = { Text("Ex: Inimigo da DP, Dev do Café") },
                                 singleLine = true,
                                 modifier = Modifier.weight(1f)
                             )
@@ -393,6 +394,16 @@ fun SettingsScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Sincronizar Grade da API")
                             }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedButton(
+                            onClick = { viewModel.resetOnboarding() },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Refazer Configuração Inicial 🔄")
                         }
                     }
                 }
