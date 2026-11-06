@@ -211,15 +211,15 @@ fun SettingsScreen(
             // Nível de Coragem / Margem de Segurança
             item {
                 val modeTitle = when {
-                    sliderValue <= 0.6f -> "Modo Nerdola 🤓 (Alerta aos 50%)"
-                    sliderValue <= 0.85f -> "Estudante Médio 🎓 (Equilíbrio aos 75%)"
-                    else -> "Modo Vida Loka 💀 (Alerta aos 95%)"
+                    sliderValue <= 0.6f -> "Modo Nerdola 🤓 (Alerta em 10/20 faltas)"
+                    sliderValue <= 0.85f -> "Estudante Médio 🎓 (Alerta em 15/20 faltas)"
+                    else -> "Modo Vida Loka 💀 (Alerta em 20/20 — No limite!)"
                 }
 
                 val modeDescription = when {
-                    sliderValue <= 0.6f -> "Começa a apitar bem cedo. Menor risco de DP, mas menos horas de sono."
-                    sliderValue <= 0.85f -> "O clássico equilíbrio universitário entre passar de ano e não enlouquecer."
-                    else -> "Joga no limite absoluto! Só avisa quando faltar 1 aula para ser eliminado pelo SIGA sem Exame Final."
+                    sliderValue <= 0.6f -> "Começa a apitar bem cedo quando atingir 10 faltas. Menor risco de DP."
+                    sliderValue <= 0.85f -> "Equilíbrio clássico. Aviso amarelo só a partir de 15 faltas acumuladas."
+                    else -> "Joga no limite exato! Avisa quando atingir 20/20 faltas, a última parada antes da DP no SIGA."
                 }
 
                 Card(
@@ -265,9 +265,9 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = "50% (Nerdola)", style = MaterialTheme.typography.labelSmall)
-                            Text(text = "75% (Médio)", style = MaterialTheme.typography.labelSmall)
-                            Text(text = "95% (Vida Loka)", style = MaterialTheme.typography.labelSmall)
+                            Text(text = "10/20 (Nerdola)", style = MaterialTheme.typography.labelSmall)
+                            Text(text = "15/20 (Médio)", style = MaterialTheme.typography.labelSmall)
+                            Text(text = "20/20 (No limite!)", style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }

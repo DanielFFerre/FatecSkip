@@ -371,18 +371,18 @@ private fun StepCourage(
     val modes = listOf(
         Triple(
             0.50f,
-            "Modo Nerdola 🤓",
-            "Começa a apitar aos 50% de faltas. Menor risco de DP, mas menos horas de sono."
+            "Modo Nerdola 🤓 (Alerta em 10/20 faltas)",
+            "Começa a apitar bem cedo quando atingir 10 faltas. Menor risco de DP."
         ),
         Triple(
             0.75f,
-            "Estudante Médio 🎓",
-            "Equilíbrio clássico aos 75%. Passo de semestre sem passar sufoco e ainda durmo bem."
+            "Estudante Médio 🎓 (Alerta em 15/20 faltas)",
+            "Equilíbrio clássico. Aviso amarelo só a partir de 15 faltas acumuladas."
         ),
         Triple(
             0.95f,
-            "Modo Vida Loka 💀",
-            "Joga no limite absoluto aos 95%! Só avisa quando faltar 1 aula para ser eliminado sem Exame Final."
+            "Modo Vida Loka 💀 (Alerta em 20/20 — No limite!)",
+            "Joga no limite exato! Avisa quando atingir 20/20 faltas, a última parada antes da DP no SIGA."
         )
     )
 
