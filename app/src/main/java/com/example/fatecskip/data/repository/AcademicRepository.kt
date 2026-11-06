@@ -186,7 +186,12 @@ class AcademicRepository(
      */
     suspend fun syncFromApi(targetSemester: Int, customUrl: String? = null): Result<String> {
         return try {
-            val endpoint = customUrl?.ifBlank { null } ?: UserPreferencesRepository.DEFAULT_API_URL
+            var endpoint = customUrl?.ifBlank { null } ?: UserPreferencesRepository.DEFAULT_API_URL
+            // Sanitiza caso o usuário cole a URL da página do Gist em vez da Raw
+            if (endpoint.contains("gist.github.com/") && !endpoint.contains("/raw")) {
+                endpoint = endpoint.replace("gist.github.com/", "gist.githubusercontent.com/").trimEnd('/') + "/raw/fatec_api.json"
+            }
+
             val apiData = try {
                 apiService.getFatecData(endpoint)
             } catch (e: Exception) {

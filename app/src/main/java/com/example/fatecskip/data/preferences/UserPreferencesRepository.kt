@@ -32,7 +32,7 @@ class UserPreferencesRepository(private val context: Context) {
         const val DEFAULT_SEMESTER = 1
         const val DEFAULT_COURAGE_LEVEL = 0.75f // Estudante Médio
         const val DEFAULT_NICKNAME = "Guerreiro da Fatec"
-        const val DEFAULT_API_URL = "https://raw.githubusercontent.com/antigravity/fatecskip/main/fatec_api.json"
+        const val DEFAULT_API_URL = "https://gist.githubusercontent.com/DanielFFerre/bcacad977f7036d66885c4268497d6ac/raw/fatec_api.json"
     }
 
     val selectedSemesterFlow: Flow<Int> = dataStore.data
@@ -72,7 +72,12 @@ class UserPreferencesRepository(private val context: Context) {
             if (exception is IOException) emit(emptyPreferences()) else throw exception
         }
         .map { preferences ->
-            preferences[KEY_API_URL] ?: DEFAULT_API_URL
+            val saved = preferences[KEY_API_URL]
+            if (saved.isNullOrBlank() || saved.contains("antigravity/fatecskip")) {
+                DEFAULT_API_URL
+            } else {
+                saved
+            }
         }
 
     val isOnboardingCompletedFlow: Flow<Boolean> = dataStore.data
