@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -46,6 +47,17 @@ class HomeViewModel(
 
     private val _userFeedback = MutableStateFlow<String?>(null)
     val userFeedback: StateFlow<String?> = _userFeedback.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            // Se a grade estiver vazia no banco, força a carga silenciosamente
+            val sem = selectedSemester.value
+            val currentList = repository.getSubjectsForSemester(sem).first()
+            if (currentList.isEmpty()) {
+                repository.syncFromApi(sem)
+            }
+        }
+    }
 
     fun consultOracle() {
         viewModelScope.launch {

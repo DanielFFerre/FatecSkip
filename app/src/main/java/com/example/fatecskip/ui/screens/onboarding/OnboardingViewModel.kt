@@ -4,13 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.fatecskip.data.preferences.UserPreferencesRepository
+import com.example.fatecskip.data.repository.AcademicRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class OnboardingViewModel(
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: UserPreferencesRepository,
+    private val repository: AcademicRepository
 ) : ViewModel() {
 
     private val _currentStep = MutableStateFlow(1) // 1 = Apelido, 2 = Semestre, 3 = Coragem
@@ -56,16 +58,21 @@ class OnboardingViewModel(
             preferencesRepository.setSelectedSemester(_selectedSemester.value)
             preferencesRepository.setCourageLevel(_courageLevel.value)
             preferencesRepository.setOnboardingCompleted(true)
+            
+            // Dispara a sincronização de dados antes de ir para a Home
+            repository.syncFromApi(_selectedSemester.value)
+
             onSuccess()
         }
     }
 
     class Factory(
-        private val preferencesRepository: UserPreferencesRepository
+        private val preferencesRepository: UserPreferencesRepository,
+        private val repository: AcademicRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return OnboardingViewModel(preferencesRepository) as T
+            return OnboardingViewModel(preferencesRepository, repository) as T
         }
     }
 }

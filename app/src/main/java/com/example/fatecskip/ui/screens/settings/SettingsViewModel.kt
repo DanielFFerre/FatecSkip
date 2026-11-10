@@ -52,6 +52,8 @@ class SettingsViewModel(
         viewModelScope.launch {
             preferencesRepository.setSelectedSemester(semester)
             _feedbackMessage.value = "Semestre alterado para o ${semester}º semestre!"
+            // Aciona automaticamente a sincronização/carga do novo semestre
+            syncFromApi()
         }
     }
 
