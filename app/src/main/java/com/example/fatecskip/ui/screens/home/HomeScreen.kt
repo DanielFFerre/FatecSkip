@@ -31,6 +31,10 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -77,6 +81,7 @@ import com.example.fatecskip.ui.theme.SafeGreen
 import com.example.fatecskip.ui.theme.WarningYellow
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -92,6 +97,8 @@ fun HomeScreen(
     val feedbackMessage by viewModel.userFeedback.collectAsState()
 
     var showAddDpDialog by remember { mutableStateOf(false) }
+    var selectedSubjectForEdit by remember { mutableStateOf<SubjectEntity?>(null) }
+    var showAddExtraSubjectDialog by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -231,8 +238,30 @@ fun HomeScreen(
                     SubjectItemCard(
                         subject = subject,
                         onIncrement = { viewModel.incrementAbsence(subject, subject.classesPerDay) },
-                        onDecrement = { viewModel.decrementAbsence(subject, 1) }
+                        onDecrement = { viewModel.decrementAbsence(subject, 1) },
+                        onEditClick = { selectedSubjectForEdit = subject }
                     )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = { showAddExtraSubjectDialog = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Adicionar Matéria Extra",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "+ Incluir Matéria de Outro Semestre (Adiantar / Fora de Fase)",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -246,6 +275,42 @@ fun HomeScreen(
                 viewModel.addCustomSubject(code, name, sem, day, classesPerDay, maxAbsences)
                 showAddDpDialog = false
             }
+        )
+    }
+
+    selectedSubjectForEdit?.let { subject ->
+        EditSubjectDialog(
+            subject = subject,
+            onDismiss = { selectedSubjectForEdit = null },
+            onSave = { id, prof, time, days, absences ->
+                viewModel.saveSubjectEdits(id, prof, time, days, absences)
+                selectedSubjectForEdit = null
+            }
+        )
+    }
+
+    if (showAddExtraSubjectDialog) {
+        AddExtraSubjectDialog(
+            viewModel = viewModel,
+            onDismiss = { showAddExtraSubjectDialog = false }
+        )
+    }
+
+    selectedSubjectForEdit?.let { subject ->
+        EditSubjectDialog(
+            subject = subject,
+            onDismiss = { selectedSubjectForEdit = null },
+            onSave = { id, prof, time, days, absences ->
+                viewModel.saveSubjectEdits(id, prof, time, days, absences)
+                selectedSubjectForEdit = null
+            }
+        )
+    }
+
+    if (showAddExtraSubjectDialog) {
+        AddExtraSubjectDialog(
+            viewModel = viewModel,
+            onDismiss = { showAddExtraSubjectDialog = false }
         )
     }
 }
@@ -527,7 +592,8 @@ private fun VerdictCard(
 private fun SubjectItemCard(
     subject: SubjectEntity,
     onIncrement: () -> Unit,
-    onDecrement: () -> Unit
+    onDecrement: () -> Unit,
+    onEditClick: () -> Unit
 ) {
     val progress = (subject.currentAbsences.toFloat() / subject.maxAbsences.toFloat()).coerceIn(0f, 1f)
 
@@ -575,6 +641,14 @@ private fun SubjectItemCard(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    Text(
+                        text = "Prof: ${subject.professor} • ${subject.classTime}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -591,7 +665,7 @@ private fun SubjectItemCard(
                                 color = WarningYellow.copy(alpha = 0.2f)
                             ) {
                                 Text(
-                                    text = "EXTENSIONISTA",
+                                    text = "EXTENSÃO",
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = WarningYellow,
@@ -606,7 +680,7 @@ private fun SubjectItemCard(
                                 color = HolidayBlue.copy(alpha = 0.2f)
                             ) {
                                 Text(
-                                    text = "DP",
+                                    text = "CUSTOM",
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = HolidayBlue,
@@ -617,18 +691,35 @@ private fun SubjectItemCard(
                     }
                 }
 
-                // Faltas Badge Monospace Gamer
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = progressColor.copy(alpha = 0.15f)
+                // Ícone de Lápis + Faltas Badge Monospace Gamer
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "$formattedHp faltas",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = progressColor
-                    )
+                    IconButton(
+                        onClick = onEditClick,
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = progressColor.copy(alpha = 0.15f)
+                    ) {
+                        Text(
+                            text = "$formattedHp faltas",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = progressColor
+                        )
+                    }
                 }
             }
 

@@ -104,6 +104,52 @@ class HomeViewModel(
         }
     }
 
+    fun saveSubjectEdits(
+        subjectId: Long,
+        professor: String,
+        classTime: String,
+        daysOfWeek: String,
+        currentAbsences: Int
+    ) {
+        viewModelScope.launch {
+            repository.updateSubjectDetails(
+                subjectId = subjectId,
+                professor = professor,
+                classTime = classTime,
+                daysOfWeek = daysOfWeek,
+                currentAbsences = currentAbsences
+            )
+            _userFeedback.value = "Matéria atualizada!"
+            if (_verdict.value != null) {
+                consultOracle()
+            }
+        }
+    }
+
+    fun getAvailableSubjectsForSemester(semester: Int): List<SubjectEntity> {
+        return repository.getCatalogSubjectsBySemester(semester)
+    }
+
+    fun addSubjectFromOtherSemester(subject: SubjectEntity) {
+        viewModelScope.launch {
+            val resultId = repository.addExtraSubject(
+                code = subject.code,
+                name = subject.name,
+                targetSemester = selectedSemester.value, // Adiciona na grade atual do aluno
+                dayOfWeek = subject.dayOfWeek,
+                classesPerDay = subject.classesPerDay,
+                maxAbsences = subject.maxAbsences,
+                isExtension = subject.isExtension
+            )
+            
+            if (resultId != -1L) {
+                _userFeedback.value = "Matéria '${subject.name}' adicionada à sua grade!"
+            } else {
+                _userFeedback.value = "Você já possui '${subject.name}' na sua grade."
+            }
+        }
+    }
+
     fun incrementAbsence(subject: SubjectEntity, count: Int = 1) {
         viewModelScope.launch {
             repository.incrementAbsence(subject, count)
