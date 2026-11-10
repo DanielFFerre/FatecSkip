@@ -98,7 +98,6 @@ fun HomeScreen(
     val isEvaluating by viewModel.isEvaluating.collectAsState()
     val feedbackMessage by viewModel.userFeedback.collectAsState()
 
-    var showAddDpDialog by remember { mutableStateOf(false) }
     var selectedSubjectForEdit by remember { mutableStateOf<SubjectEntity?>(null) }
     var showAddExtraSubjectDialog by remember { mutableStateOf(false) }
 
@@ -187,7 +186,7 @@ fun HomeScreen(
                     }
 
                     OutlinedButton(
-                        onClick = { showAddDpDialog = true },
+                        onClick = { showAddExtraSubjectDialog = true },
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                     ) {
@@ -269,28 +268,6 @@ fun HomeScreen(
         }
     }
 
-    if (showAddDpDialog) {
-        AddDpSubjectDialog(
-            currentSemester = semester,
-            onDismiss = { showAddDpDialog = false },
-            onConfirm = { code, name, sem, day, classesPerDay, maxAbsences ->
-                viewModel.addCustomSubject(code, name, sem, day, classesPerDay, maxAbsences)
-                showAddDpDialog = false
-            }
-        )
-    }
-
-    selectedSubjectForEdit?.let { subject ->
-        EditSubjectDialog(
-            subject = subject,
-            onDismiss = { selectedSubjectForEdit = null },
-            onSave = { id, prof, time, days, absences ->
-                viewModel.saveSubjectEdits(id, prof, time, days, absences)
-                selectedSubjectForEdit = null
-            }
-        )
-    }
-
     if (showAddExtraSubjectDialog) {
         AddExtraSubjectDialog(
             viewModel = viewModel,
@@ -306,13 +283,6 @@ fun HomeScreen(
                 viewModel.saveSubjectEdits(id, prof, time, days, absences)
                 selectedSubjectForEdit = null
             }
-        )
-    }
-
-    if (showAddExtraSubjectDialog) {
-        AddExtraSubjectDialog(
-            viewModel = viewModel,
-            onDismiss = { showAddExtraSubjectDialog = false }
         )
     }
 }
@@ -795,166 +765,4 @@ private fun SubjectItemCard(
             }
         }
     }
-}
-
-@Composable
-private fun AddDpSubjectDialog(
-    currentSemester: Int,
-    onDismiss: () -> Unit,
-    onConfirm: (code: String, name: String, semester: Int, dayOfWeek: Int, classesPerDay: Int, maxAbsences: Int) -> Unit
-) {
-    var code by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var targetSemester by remember { mutableIntStateOf(currentSemester) }
-    var dayOfWeek by remember { mutableIntStateOf(1) }
-    var is80Hours by remember { mutableStateOf(true) } // true = 80h (4 aulas/dia), false = 40h (2 aulas/dia)
-
-    val days = listOf(
-        1 to "Segunda",
-        2 to "Terça",
-        3 to "Quarta",
-        4 to "Quinta",
-        5 to "Sexta",
-        6 to "Sábado"
-    )
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Incluir Matéria Extra 🎒",
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                Text(
-                    text = "Puxe uma matéria de outro semestre do catálogo (Adiantamento / Fora de Fase) ou cadastre manualmente.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                OutlinedTextField(
-                    value = code,
-                    onValueChange = { code = it },
-                    label = { Text("Código (Ex: IBD002)") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nome da Matéria (Ex: Banco de Dados Rel.)") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Text(
-                    text = "Semestre em que está matriculado:",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    (1..3).forEach { sem ->
-                        FilterChip(
-                            selected = targetSemester == sem,
-                            onClick = { targetSemester = sem },
-                            label = { Text("${sem}º") },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    (4..6).forEach { sem ->
-                        FilterChip(
-                            selected = targetSemester == sem,
-                            onClick = { targetSemester = sem },
-                            label = { Text("${sem}º") },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                Text(
-                    text = "Dia da Semana da Aula:",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                val daysChunked = days.chunked(3)
-                daysChunked.forEach { rowDays ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        rowDays.forEach { (dInt, dName) ->
-                            FilterChip(
-                                selected = dayOfWeek == dInt,
-                                onClick = { dayOfWeek = dInt },
-                                label = { Text(dName.take(3)) },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                }
-
-                Text(
-                    text = "Carga Horária / Aulas por Dia:",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = is80Hours,
-                        onClick = { is80Hours = true },
-                        label = { Text("80h (4 aulas/dia • Máx 20 faltas)") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    FilterChip(
-                        selected = !is80Hours,
-                        onClick = { is80Hours = false },
-                        label = { Text("40h (2 aulas/dia • Máx 10 faltas)") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (name.isNotBlank()) {
-                        val classes = if (is80Hours) 4 else 2
-                        val maxAbs = if (is80Hours) 20 else 10
-                        val cd = if (code.isBlank()) "DP${(10..99).random()}" else code
-                        onConfirm(cd, name, targetSemester, dayOfWeek, classes, maxAbs)
-                    }
-                },
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text("Adicionar")
-            }
-        },
-        dismissButton = {
-            OutlinedButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text("Cancelar")
-            }
-        }
-    )
 }

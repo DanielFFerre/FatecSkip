@@ -126,7 +126,7 @@ class HomeViewModel(
         }
     }
 
-    fun getAvailableSubjectsForSemester(semester: Int): List<SubjectEntity> {
+    fun getCatalogSubjectsBySemester(semester: Int): List<SubjectEntity> {
         return repository.getCatalogSubjectsBySemester(semester)
     }
 
@@ -203,4 +203,3 @@ class HomeViewModel(
         }
     }
 }
-

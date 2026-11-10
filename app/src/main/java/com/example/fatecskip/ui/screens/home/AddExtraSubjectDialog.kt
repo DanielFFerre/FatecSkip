@@ -11,6 +11,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExtraSubjectDialog(
     viewModel: HomeViewModel,
@@ -32,10 +38,26 @@ fun AddExtraSubjectDialog(
 
     // Obter matérias disponíveis via HomeViewModel
     val availableSubjects = remember(searchSemester) {
-        viewModel.getAvailableSubjectsForSemester(searchSemester)
+        viewModel.getCatalogSubjectsBySemester(searchSemester)
     }
 
     var selectedSubjectCode by remember { mutableStateOf<String?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+
+    var codeInput by remember { mutableStateOf("") }
+    var nameInput by remember { mutableStateOf("") }
+    var dayOfWeek by remember { mutableIntStateOf(1) }
+    var is80Hours by remember { mutableStateOf(true) }
+    var isManual by remember { mutableStateOf(false) }
+
+    val days = listOf(
+        1 to "Segunda",
+        2 to "Terça",
+        3 to "Quarta",
+        4 to "Quinta",
+        5 to "Sexta",
+        6 to "Sábado"
+    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -52,9 +74,9 @@ fun AddExtraSubjectDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = "Escolha o semestre original da disciplina que deseja adicionar:",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "Semestre em que a disciplina pertence:",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Row(
@@ -64,7 +86,7 @@ fun AddExtraSubjectDialog(
                     (1..3).forEach { sem ->
                         FilterChip(
                             selected = searchSemester == sem,
-                            onClick = { searchSemester = sem; selectedSubjectCode = null },
+                            onClick = { searchSemester = sem; selectedSubjectCode = null; isManual = false; codeInput = ""; nameInput = "" },
                             label = { Text("${sem}º") },
                             modifier = Modifier.weight(1f)
                         )
@@ -77,7 +99,7 @@ fun AddExtraSubjectDialog(
                     (4..6).forEach { sem ->
                         FilterChip(
                             selected = searchSemester == sem,
-                            onClick = { searchSemester = sem; selectedSubjectCode = null },
+                            onClick = { searchSemester = sem; selectedSubjectCode = null; isManual = false; codeInput = ""; nameInput = "" },
                             label = { Text("${sem}º") },
                             modifier = Modifier.weight(1f)
                         )
@@ -85,35 +107,145 @@ fun AddExtraSubjectDialog(
                 }
 
                 Text(
-                    text = "Disciplinas disponíveis:",
+                    text = "Disciplina do Catálogo:",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.labelMedium
                 )
+                
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it }
+                ) {
+                    val displayCode = if (isManual) "OUTRO - Digitar manualmente" else selectedSubjectCode ?: "Selecione uma matéria..."
+                    OutlinedTextField(
+                        value = displayCode,
+                        onValueChange = {},
+                        label = { Text("Código") },
+                        readOnly = true,
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                    )
 
-                // Lista simulada em dropdown ou chip. Por simplicidade visual, Column com scroll seria ideal
-                // Vamos usar FilterChips empilhados ou OutlinedButtons simples (pois o AlertDialog em M3 faz scroll automático)
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    availableSubjects.forEach { sub ->
-                        FilterChip(
-                            selected = selectedSubjectCode == sub.code,
-                            onClick = { selectedSubjectCode = sub.code },
-                            label = { Text(sub.name, maxLines = 1) },
-                            modifier = Modifier.fillMaxWidth()
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        availableSubjects.forEach { sub ->
+                            DropdownMenuItem(
+                                text = { Text("${sub.code} - ${sub.name}") },
+                                onClick = {
+                                    selectedSubjectCode = sub.code
+                                    codeInput = sub.code
+                                    nameInput = sub.name
+                                    dayOfWeek = sub.dayOfWeek
+                                    is80Hours = sub.classesPerDay == 4
+                                    isManual = false
+                                    expanded = false
+                                }
+                            )
+                        }
+                        DropdownMenuItem(
+                            text = { Text("OUTRO - Digitar manualmente", fontWeight = FontWeight.Bold) },
+                            onClick = {
+                                selectedSubjectCode = null
+                                codeInput = ""
+                                nameInput = ""
+                                isManual = true
+                                expanded = false
+                            }
                         )
                     }
+                }
+
+                OutlinedTextField(
+                    value = nameInput,
+                    onValueChange = { nameInput = it },
+                    label = { Text("Nome da Matéria (Ex: Banco de Dados)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = !isManual && selectedSubjectCode != null
+                )
+
+                Text(
+                    text = "Dia da Semana da Aula:",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                val daysChunked = days.chunked(3)
+                daysChunked.forEach { rowDays ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        rowDays.forEach { (dInt, dName) ->
+                            FilterChip(
+                                selected = dayOfWeek == dInt,
+                                onClick = { dayOfWeek = dInt },
+                                label = { Text(dName.take(3)) },
+                                modifier = Modifier.weight(1f),
+                                enabled = isManual || selectedSubjectCode == null
+                            )
+                        }
+                    }
+                }
+
+                Text(
+                    text = "Carga Horária / Aulas por Dia:",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = is80Hours,
+                        onClick = { is80Hours = true },
+                        label = { Text("80h (4 aulas/dia • Máx 20 faltas)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = isManual || selectedSubjectCode == null
+                    )
+                    FilterChip(
+                        selected = !is80Hours,
+                        onClick = { is80Hours = false },
+                        label = { Text("40h (2 aulas/dia • Máx 10 faltas)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = isManual || selectedSubjectCode == null
+                    )
                 }
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    val sub = availableSubjects.find { it.code == selectedSubjectCode }
-                    if (sub != null) {
-                        viewModel.addSubjectFromOtherSemester(sub)
+                    if (nameInput.isNotBlank()) {
+                        if (isManual) {
+                            val classes = if (is80Hours) 4 else 2
+                            val maxAbs = if (is80Hours) 20 else 10
+                            val cd = if (codeInput.isBlank()) "DP${(10..99).random()}" else codeInput
+                            
+                            viewModel.addCustomSubject(
+                                code = cd,
+                                name = nameInput,
+                                semester = searchSemester,
+                                dayOfWeek = dayOfWeek,
+                                classesPerDay = classes,
+                                maxAbsences = maxAbs
+                            )
+                        } else {
+                            val sub = availableSubjects.find { it.code == selectedSubjectCode }
+                            if (sub != null) {
+                                viewModel.addSubjectFromOtherSemester(sub)
+                            }
+                        }
                         onDismiss()
                     }
                 },
-                enabled = selectedSubjectCode != null,
+                enabled = nameInput.isNotBlank() && (selectedSubjectCode != null || isManual),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text("Adicionar")
