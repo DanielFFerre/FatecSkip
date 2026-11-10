@@ -81,7 +81,7 @@ fun SettingsScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            viewModel.triggerTestNotification(context)
+            viewModel.triggerTestNotification(context, nicknameInput)
         }
     }
 
@@ -101,7 +101,7 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             // Header
@@ -315,7 +315,7 @@ fun SettingsScreen(
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 } else {
-                                    viewModel.triggerTestNotification(context)
+                                    viewModel.triggerTestNotification(context, nicknameInput)
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),

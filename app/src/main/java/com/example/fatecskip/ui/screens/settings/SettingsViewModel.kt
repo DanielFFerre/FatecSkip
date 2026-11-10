@@ -101,8 +101,11 @@ class SettingsViewModel(
         }
     }
 
-    fun triggerTestNotification(context: Context) {
+    fun triggerTestNotification(context: Context, currentNicknameInput: String) {
         viewModelScope.launch {
+            // Garante que a última versão do nome na tela seja salva no DataStore
+            preferencesRepository.setStudentNickname(currentNicknameInput)
+            
             DailyCheckWorker.scheduleTestNotification(context, delaySeconds = 5)
             _feedbackMessage.value = "⚡ Teste agendado! Em 5 segundos o Oráculo enviará uma notificação..."
         }

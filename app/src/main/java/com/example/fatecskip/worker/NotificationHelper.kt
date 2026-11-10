@@ -12,8 +12,8 @@ import com.example.fatecskip.MainActivity
 
 object NotificationHelper {
 
-    const val CHANNEL_ID = "fatec_skip_notifications"
-    const val CHANNEL_NAME = "Oráculo da Falta - Alertas de Sobrevivência"
+    const val CHANNEL_ID = "siga_na_cama_oracle_v2"
+    const val CHANNEL_NAME = "Oráculo SIGA na cama"
     const val CHANNEL_DESC = "Notificações diárias sobre provas críticas, feriados e risco de DP"
     const val NOTIFICATION_ID = 4200
 
@@ -49,7 +49,8 @@ object NotificationHelper {
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setSmallIcon(com.example.fatecskip.R.drawable.ic_notification_bed)
+            .setColor(0xFF8B5CF6.toInt())
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
