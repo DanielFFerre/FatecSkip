@@ -213,24 +213,18 @@ class AcademicRepository(
         for (subject in subjectsToday) {
             val simulatedAbsences = subject.currentAbsences + subject.classesPerDay
             if (simulatedAbsences > subject.maxAbsences) {
-                val messages = if (subject.isExtension) {
-                    listOf(
-                        "PROIBIDO FALTAR! '${subject.name}' é DISCIPLINA EXTENSIONISTA OBRIGATÓRIA (PPC R-06). Faltar hoje te elimina do Exame Final e exige refazer 100% das 60h extensionistas!",
-                        "💀 PERIGO EXTENSIONISTA! '${subject.name}' não aceita regime domiciliar e exceder 25% de faltas causa reprovação direta no SIGA sem direito a Exame Final!",
-                        "NEM PENSE EM FALTAR! '${subject.name}' é componente extensionista. Faltar hoje te elimina sem recurso!"
-                    )
+                val extensionWarning = if (subject.isExtension) {
+                    " ⚠️ Atenção: Matéria de Extensão não aceita Regime Domiciliar!"
                 } else {
-                    listOf(
-                        "PROIBIDO FALTAR! Se faltar hoje em '${subject.name}', você REPROVA por falta ($simulatedAbsences/${subject.maxAbsences}). De acordo com a Portaria CGESG nº 06/2026, estourar 25% de faltas ELIMINA TOTALMENTE o direito ao Exame Final!",
-                        "💀 PERIGO FATAL! Mais uma falta hoje e o SIGA cancela seu semestre em '${subject.name}'! Sem direito a recurso ou Exame Final!",
-                        "NEM PENSE EM FALTAR! O fantasma da DP em '${subject.name}' já está puxando seu pé e a regra da Fatec não dá Exame Final para quem reprova por falta!"
-                    )
+                    ""
                 }
+                val customMessage =
+                    "PROIBIDO FALTAR! Com mais uma falta em '${subject.name}' ($simulatedAbsences/${subject.maxAbsences}), você ultrapassa o limite de 25% de faltas e fica com menos de 75% de presença. A reprovação por frequência bloqueia totalmente o direito ao Exame Final, mesmo com média entre 4,0 e 5,9: é reprovação direta.$extensionWarning"
                 return SkipVerdict.ForbiddenAbsenceLimit(
                     subject.name,
                     subject.currentAbsences,
                     subject.maxAbsences,
-                    messages.random()
+                    customMessage
                 )
             }
         }
@@ -258,7 +252,7 @@ class AcademicRepository(
                     subject.name,
                     subject.currentAbsences,
                     subject.maxAbsences,
-                    messages.random(),
+                    "${messages.random()} Lembre-se: atestado médico curto só reagenda prova, mas a falta continua contando no SIGA!",
                     excuse
                 )
             }
@@ -367,4 +361,3 @@ class AcademicRepository(
         }
     }
 }
-

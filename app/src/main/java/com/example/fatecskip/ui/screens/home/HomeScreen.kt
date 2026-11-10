@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -100,6 +101,7 @@ fun HomeScreen(
 
     var selectedSubjectForEdit by remember { mutableStateOf<SubjectEntity?>(null) }
     var showAddExtraSubjectDialog by remember { mutableStateOf(false) }
+    var showHouseRulesDialog by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -136,7 +138,8 @@ fun HomeScreen(
             item {
                 OracleButtonCard(
                     isEvaluating = isEvaluating,
-                    onConsultClick = { viewModel.consultOracle() }
+                    onConsultClick = { viewModel.consultOracle() },
+                    onRulesClick = { showHouseRulesDialog = true }
                 )
             }
 
@@ -275,6 +278,47 @@ fun HomeScreen(
         )
     }
 
+    if (showHouseRulesDialog) {
+        AlertDialog(
+            onDismissRequest = { showHouseRulesDialog = false },
+            title = {
+                Text(
+                    text = "📜 Regras de Sobrevivência (Fatec)",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Limite de 25% e Exame Final", fontWeight = FontWeight.Bold)
+                        Text(
+                            "Estourar 25% de faltas reprova direto e bloqueia o direito ao Exame Final, mesmo com média entre 4,0 e 5,9."
+                        )
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("A Verdade sobre Atestados", fontWeight = FontWeight.Bold)
+                        Text(
+                            "Atestado médico curto serve para justificar ausência em dia de prova (segunda chamada), mas a falta continua registrada no SIGA. Regime de Exercícios Domiciliares exige afastamento médico longo (14+ dias)."
+                        )
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Matérias de Extensão e Laboratórios", fontWeight = FontWeight.Bold)
+                        Text("Não aceitam Regime Domiciliar em nenhuma hipótese.")
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { showHouseRulesDialog = false }) {
+                    Text("Entendi")
+                }
+            }
+        )
+    }
+
     selectedSubjectForEdit?.let { subject ->
         EditSubjectDialog(
             subject = subject,
@@ -364,7 +408,8 @@ private fun HeaderCard(
 @Composable
 private fun OracleButtonCard(
     isEvaluating: Boolean,
-    onConsultClick: () -> Unit
+    onConsultClick: () -> Unit,
+    onRulesClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -380,13 +425,28 @@ private fun OracleButtonCard(
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "🔮 O ORÁCULO DA FALTA",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                letterSpacing = 1.sp
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "🔮 O ORÁCULO DA FALTA",
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 1.sp
+                )
+                IconButton(
+                    onClick = onRulesClick,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Regras SIGA",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Cruze suas faltas com o Regulamento CEETEPS e saiba se sua cama foi autorizada hoje.",

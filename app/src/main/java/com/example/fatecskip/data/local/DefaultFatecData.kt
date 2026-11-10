@@ -158,7 +158,9 @@ object DefaultFatecData {
             ExcuseEntity(text = "O Oráculo da Falta me avisou que as estrelas do SIGA não recomendam sair de casa hoje."),
             ExcuseEntity(text = "Estou realizando testes de estresse no meu colchão."),
             ExcuseEntity(text = "Fui compilar o café da manhã e deu Timeout."),
-            ExcuseEntity(text = "Fui dar git push na coragem e deu merge conflict.")
+            ExcuseEntity(text = "Fui dar git push na coragem e deu merge conflict."),
+            ExcuseEntity(text = "Atestado de um dia não é passe livre: no SIGA, a falta continua no placar!"),
+            ExcuseEntity(text = "Perder o Exame Final por falta é o único final que nem uma recuperação de código conserta.")
         )
     }
 }
