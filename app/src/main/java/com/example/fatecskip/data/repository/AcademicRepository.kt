@@ -324,15 +324,29 @@ class AcademicRepository(
 
                     val subjectEntities = subjectDtos.map { dto ->
                         val prev = existingMap[dto.code]
+                        
+                        // Limpeza automática de nome e extração de professor
+                        var cleanName = dto.name.trim()
+                        var extractedProf = ""
+                        val parensIndex = cleanName.lastIndexOf("(")
+                        if (parensIndex != -1 && cleanName.endsWith(")")) {
+                            extractedProf = cleanName.substring(parensIndex + 1, cleanName.length - 1).trim()
+                            cleanName = cleanName.substring(0, parensIndex).trim()
+                        }
+                        
                         SubjectEntity(
                             id = prev?.id ?: 0,
                             code = dto.code,
-                            name = dto.name,
+                            name = cleanName,
                             semester = semInt,
                             dayOfWeek = dto.dayOfWeek,
                             classesPerDay = dto.classesPerDay,
                             currentAbsences = prev?.currentAbsences ?: 0,
-                            maxAbsences = dto.maxAbsences
+                            maxAbsences = dto.maxAbsences,
+                            professor = if (prev == null || prev.professor.isBlank() || prev.professor == "Docente não definido") extractedProf else prev.professor,
+                            classTime = prev?.classTime ?: "19:00 - 22:30",
+                            isCustomized = prev?.isCustomized ?: false,
+                            isExtension = dto.isExtension
                         )
                     }
                     subjectDao.insertSubjects(subjectEntities)

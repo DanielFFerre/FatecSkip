@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -39,13 +41,16 @@ fun AddExtraSubjectDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Incluir Matéria 📚",
+                text = "Incluir Matéria Extra 📚",
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium
             )
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
                 Text(
                     text = "Escolha o semestre original da disciplina que deseja adicionar:",
                     style = MaterialTheme.typography.bodySmall,
@@ -54,25 +59,27 @@ fun AddExtraSubjectDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     (1..3).forEach { sem ->
                         FilterChip(
                             selected = searchSemester == sem,
                             onClick = { searchSemester = sem; selectedSubjectCode = null },
-                            label = { Text("${sem}º") }
+                            label = { Text("${sem}º") },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     (4..6).forEach { sem ->
                         FilterChip(
                             selected = searchSemester == sem,
                             onClick = { searchSemester = sem; selectedSubjectCode = null },
-                            label = { Text("${sem}º") }
+                            label = { Text("${sem}º") },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }

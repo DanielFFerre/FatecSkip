@@ -22,7 +22,7 @@ data class SubjectEntity(
     val maxAbsences: Int = 20,
     val isCustomized: Boolean = false,
     val isExtension: Boolean = false,
-    val professor: String = "Docente não definido",
+    val professor: String = "",
     val classTime: String = "19:00 - 22:30"
 ) {
     /**

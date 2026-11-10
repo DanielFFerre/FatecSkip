@@ -13,69 +13,120 @@ object DefaultFatecData {
     fun getDefaultSubjects(): List<SubjectEntity> {
         val list = mutableListOf<SubjectEntity>()
 
+        fun extractProfAndCleanName(originalName: String): Pair<String, String> {
+            var cleanName = originalName.trim()
+            var extractedProf = ""
+            val parensIndex = cleanName.lastIndexOf("(")
+            if (parensIndex != -1 && cleanName.endsWith(")")) {
+                extractedProf = cleanName.substring(parensIndex + 1, cleanName.length - 1).trim()
+                cleanName = cleanName.substring(0, parensIndex).trim()
+            }
+            return Pair(cleanName, extractedProf)
+        }
+
         // ==========================================
         // 1º SEMESTRE - MATUTINO DSM
         // ==========================================
-        list.add(SubjectEntity(code = "DWI01", name = "Desenv. Web I (Hélio Cesar)", semester = 1, dayOfWeek = 1, daysOfWeek = "1,2", classesPerDay = 2, maxAbsences = 20))
-        list.add(SubjectEntity(code = "ALG01", name = "Algoritmos (Lúcio)", semester = 1, dayOfWeek = 1, daysOfWeek = "1,3", classesPerDay = 2, maxAbsences = 20))
-        list.add(SubjectEntity(code = "MBD01", name = "Model. de Banco (Sueli Ap)", semester = 1, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "SOP01", name = "Sistema Op (Silas / Ismael)", semester = 1, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "ES101", name = "Eng. Software I (Rháleff)", semester = 1, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20, isExtension = true))
-        list.add(SubjectEntity(code = "DDG01", name = "Design Digital (Patricia)", semester = 1, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
+        val dwi01 = extractProfAndCleanName("Desenv. Web I (Hélio Cesar)")
+        list.add(SubjectEntity(code = "DWI01", name = dwi01.first, professor = dwi01.second, semester = 1, dayOfWeek = 1, daysOfWeek = "1,2", classesPerDay = 2, maxAbsences = 20))
+        val alg01 = extractProfAndCleanName("Algoritmos (Lúcio)")
+        list.add(SubjectEntity(code = "ALG01", name = alg01.first, professor = alg01.second, semester = 1, dayOfWeek = 1, daysOfWeek = "1,3", classesPerDay = 2, maxAbsences = 20))
+        val mbd01 = extractProfAndCleanName("Model. de Banco (Sueli Ap)")
+        list.add(SubjectEntity(code = "MBD01", name = mbd01.first, professor = mbd01.second, semester = 1, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20))
+        val sop01 = extractProfAndCleanName("Sistema Op (Silas / Ismael)")
+        list.add(SubjectEntity(code = "SOP01", name = sop01.first, professor = sop01.second, semester = 1, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
+        val es101 = extractProfAndCleanName("Eng. Software I (Rháleff)")
+        list.add(SubjectEntity(code = "ES101", name = es101.first, professor = es101.second, semester = 1, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20, isExtension = true))
+        val ddg01 = extractProfAndCleanName("Design Digital (Patricia)")
+        list.add(SubjectEntity(code = "DDG01", name = ddg01.first, professor = ddg01.second, semester = 1, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
 
         // ==========================================
         // 2º SEMESTRE - MATUTINO DSM
         // ==========================================
-        list.add(SubjectEntity(code = "ES201", name = "Eng Software II (Luiz Antonio / Marco A)", semester = 2, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 4, maxAbsences = 20, isExtension = true))
-        list.add(SubjectEntity(code = "EDD01", name = "Estrutura Dados (Lucio)", semester = 2, dayOfWeek = 1, daysOfWeek = "1,3", classesPerDay = 2, maxAbsences = 20))
-        list.add(SubjectEntity(code = "DW201", name = "Desenv. Web II (Bruno)", semester = 2, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "MPC01", name = "Mat para Comp (Rosângela)", semester = 2, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "TPI01", name = "Téc Prog I (Marcos Vasconcelos)", semester = 2, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "BDR01", name = "Banco Dados Rel. (Rafael Miranda / Renan)", semester = 2, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
+        val es201 = extractProfAndCleanName("Eng Software II (Luiz Antonio / Marco A)")
+        list.add(SubjectEntity(code = "ES201", name = es201.first, professor = es201.second, semester = 2, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 4, maxAbsences = 20, isExtension = true))
+        val edd01 = extractProfAndCleanName("Estrutura Dados (Lucio)")
+        list.add(SubjectEntity(code = "EDD01", name = edd01.first, professor = edd01.second, semester = 2, dayOfWeek = 1, daysOfWeek = "1,3", classesPerDay = 2, maxAbsences = 20))
+        val dw201 = extractProfAndCleanName("Desenv. Web II (Bruno)")
+        list.add(SubjectEntity(code = "DW201", name = dw201.first, professor = dw201.second, semester = 2, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20))
+        val mpc01 = extractProfAndCleanName("Mat para Comp (Rosângela)")
+        list.add(SubjectEntity(code = "MPC01", name = mpc01.first, professor = mpc01.second, semester = 2, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
+        val tpi01 = extractProfAndCleanName("Téc Prog I (Marcos Vasconcelos)")
+        list.add(SubjectEntity(code = "TPI01", name = tpi01.first, professor = tpi01.second, semester = 2, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
+        val bdr01 = extractProfAndCleanName("Banco Dados Rel. (Rafael Miranda / Renan)")
+        list.add(SubjectEntity(code = "BDR01", name = bdr01.first, professor = bdr01.second, semester = 2, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
 
         // ==========================================
         // 3º SEMESTRE - MATUTINO DSM
         // ==========================================
-        list.add(SubjectEntity(code = "IHC01", name = "Int. H. Computador (Lucio)", semester = 3, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 2, maxAbsences = 10))
-        list.add(SubjectEntity(code = "GAG01", name = "Gestão Ágil (Bruno)", semester = 3, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 4, maxAbsences = 20, isExtension = true))
-        list.add(SubjectEntity(code = "BDN01", name = "Ban. Dados N Rel. (Marcos Vasconcelos)", semester = 3, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "DW301", name = "Desenv. Web III (Vinicius Heltai)", semester = 3, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "ALG03", name = "Álgebra Linear (Rosângela)", semester = 3, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "ING01", name = "Inglês I (Luciano / Valteir)", semester = 3, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 2, maxAbsences = 10))
-        list.add(SubjectEntity(code = "TP201", name = "Téc Prog II (Vinicius)", semester = 3, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
+        val ihc01 = extractProfAndCleanName("Int. H. Computador (Lucio)")
+        list.add(SubjectEntity(code = "IHC01", name = ihc01.first, professor = ihc01.second, semester = 3, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 2, maxAbsences = 10))
+        val gag01 = extractProfAndCleanName("Gestão Ágil (Bruno)")
+        list.add(SubjectEntity(code = "GAG01", name = gag01.first, professor = gag01.second, semester = 3, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 4, maxAbsences = 20, isExtension = true))
+        val bdn01 = extractProfAndCleanName("Ban. Dados N Rel. (Marcos Vasconcelos)")
+        list.add(SubjectEntity(code = "BDN01", name = bdn01.first, professor = bdn01.second, semester = 3, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20))
+        val dw301 = extractProfAndCleanName("Desenv. Web III (Vinicius Heltai)")
+        list.add(SubjectEntity(code = "DW301", name = dw301.first, professor = dw301.second, semester = 3, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
+        val alg03 = extractProfAndCleanName("Álgebra Linear (Rosângela)")
+        list.add(SubjectEntity(code = "ALG03", name = alg03.first, professor = alg03.second, semester = 3, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
+        val ing01 = extractProfAndCleanName("Inglês I (Luciano / Valteir)")
+        list.add(SubjectEntity(code = "ING01", name = ing01.first, professor = ing01.second, semester = 3, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 2, maxAbsences = 10))
+        val tp201 = extractProfAndCleanName("Téc Prog II (Vinicius)")
+        list.add(SubjectEntity(code = "TP201", name = tp201.first, professor = tp201.second, semester = 3, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
 
         // ==========================================
         // 4º SEMESTRE - MATUTINO DSM
         // ==========================================
-        list.add(SubjectEntity(code = "IOT01", name = "Internet Coisas (Rháleff / Ismael)", semester = 4, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "LDW01", name = "Lab. Des. Web (Edson)", semester = 4, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20, isExtension = true))
-        list.add(SubjectEntity(code = "PDM01", name = "Prog. Disp. Móveis I (Rafael Lopes)", semester = 4, dayOfWeek = 2, daysOfWeek = "2,4", classesPerDay = 2, maxAbsences = 20))
-        list.add(SubjectEntity(code = "IEC01", name = "Int. Entrega Contínua (Rafael Lopes)", semester = 4, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "EST01", name = "Estat. Aplicada (Diogo Soares)", semester = 4, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "ING02", name = "Inglês II (Luciano / Valteir)", semester = 4, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 2, maxAbsences = 10))
-        list.add(SubjectEntity(code = "UX001", name = "Experiência Usuário (Carlo Ronny)", semester = 4, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 2, maxAbsences = 10))
+        val iot01 = extractProfAndCleanName("Internet Coisas (Rháleff / Ismael)")
+        list.add(SubjectEntity(code = "IOT01", name = iot01.first, professor = iot01.second, semester = 4, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 4, maxAbsences = 20))
+        val ldw01 = extractProfAndCleanName("Lab. Des. Web (Edson)")
+        list.add(SubjectEntity(code = "LDW01", name = ldw01.first, professor = ldw01.second, semester = 4, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20, isExtension = true))
+        val pdm01 = extractProfAndCleanName("Prog. Disp. Móveis I (Rafael Lopes)")
+        list.add(SubjectEntity(code = "PDM01", name = pdm01.first, professor = pdm01.second, semester = 4, dayOfWeek = 2, daysOfWeek = "2,4", classesPerDay = 2, maxAbsences = 20))
+        val iec01 = extractProfAndCleanName("Int. Entrega Contínua (Rafael Lopes)")
+        list.add(SubjectEntity(code = "IEC01", name = iec01.first, professor = iec01.second, semester = 4, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
+        val est01 = extractProfAndCleanName("Estat. Aplicada (Diogo Soares)")
+        list.add(SubjectEntity(code = "EST01", name = est01.first, professor = est01.second, semester = 4, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
+        val ing02 = extractProfAndCleanName("Inglês II (Luciano / Valteir)")
+        list.add(SubjectEntity(code = "ING02", name = ing02.first, professor = ing02.second, semester = 4, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 2, maxAbsences = 10))
+        val ux001 = extractProfAndCleanName("Experiência Usuário (Carlo Ronny)")
+        list.add(SubjectEntity(code = "UX001", name = ux001.first, professor = ux001.second, semester = 4, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 2, maxAbsences = 10))
 
         // ==========================================
         // 5º SEMESTRE - MATUTINO DSM
         // ==========================================
-        list.add(SubjectEntity(code = "FRT01", name = "F. Redação técnica (Thierri)", semester = 5, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 2, maxAbsences = 10))
-        list.add(SubjectEntity(code = "ING03", name = "Inglês III (Amaury)", semester = 5, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 2, maxAbsences = 10))
-        list.add(SubjectEntity(code = "CPN01", name = "Comp. Nuvem I (Odair / Renan)", semester = 5, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "LDM01", name = "Lab. de Des. p/ Disp. Móveis (Carlo Ronny)", semester = 5, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20, isExtension = true))
-        list.add(SubjectEntity(code = "PDM03", name = "Prog. Disp. Móv. II (Vinicius)", semester = 5, dayOfWeek = 3, daysOfWeek = "3,5", classesPerDay = 2, maxAbsences = 20))
-        list.add(SubjectEntity(code = "SDA01", name = "Seg. D. Aplicações (Evandro / Ismael)", semester = 5, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "APM01", name = "Aprendiz. Máquina (Rháleff / Marcelo)", semester = 5, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
+        val frt01 = extractProfAndCleanName("F. Redação técnica (Thierri)")
+        list.add(SubjectEntity(code = "FRT01", name = frt01.first, professor = frt01.second, semester = 5, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 2, maxAbsences = 10))
+        val ing03 = extractProfAndCleanName("Inglês III (Amaury)")
+        list.add(SubjectEntity(code = "ING03", name = ing03.first, professor = ing03.second, semester = 5, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 2, maxAbsences = 10))
+        val cpn01 = extractProfAndCleanName("Comp. Nuvem I (Odair / Renan)")
+        list.add(SubjectEntity(code = "CPN01", name = cpn01.first, professor = cpn01.second, semester = 5, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 4, maxAbsences = 20))
+        val ldm01 = extractProfAndCleanName("Lab. de Des. p/ Disp. Móveis (Carlo Ronny)")
+        list.add(SubjectEntity(code = "LDM01", name = ldm01.first, professor = ldm01.second, semester = 5, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20, isExtension = true))
+        val pdm03 = extractProfAndCleanName("Prog. Disp. Móv. II (Vinicius)")
+        list.add(SubjectEntity(code = "PDM03", name = pdm03.first, professor = pdm03.second, semester = 5, dayOfWeek = 3, daysOfWeek = "3,5", classesPerDay = 2, maxAbsences = 20))
+        val sda01 = extractProfAndCleanName("Seg. D. Aplicações (Evandro / Ismael)")
+        list.add(SubjectEntity(code = "SDA01", name = sda01.first, professor = sda01.second, semester = 5, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
+        val apm01 = extractProfAndCleanName("Aprendiz. Máquina (Rháleff / Marcelo)")
+        list.add(SubjectEntity(code = "APM01", name = apm01.first, professor = apm01.second, semester = 5, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
 
         // ==========================================
         // 6º SEMESTRE - MATUTINO DSM
         // ==========================================
-        list.add(SubjectEntity(code = "LDM02", name = "Lab. Desenv. Multip. (Rafael Guem / Renan)", semester = 6, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 4, maxAbsences = 20, isExtension = true))
-        list.add(SubjectEntity(code = "ETC01", name = "Ética (Janaina)", semester = 6, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 2, maxAbsences = 10))
-        list.add(SubjectEntity(code = "MND01", name = "Mineração de Dados (Edson)", semester = 6, dayOfWeek = 2, daysOfWeek = "2,3", classesPerDay = 2, maxAbsences = 20))
-        list.add(SubjectEntity(code = "QTS01", name = "Qual. e Testes SW (Edson)", semester = 6, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "CN201", name = "Comp. Nuvem II (Renan)", semester = 6, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "PLN01", name = "PLN (Andrea)", semester = 6, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
-        list.add(SubjectEntity(code = "ING04", name = "Inglês IV (Luciano / Valteir)", semester = 6, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 2, maxAbsences = 10))
+        val ldm02 = extractProfAndCleanName("Lab. Desenv. Multip. (Rafael Guem / Renan)")
+        list.add(SubjectEntity(code = "LDM02", name = ldm02.first, professor = ldm02.second, semester = 6, dayOfWeek = 1, daysOfWeek = "1", classesPerDay = 4, maxAbsences = 20, isExtension = true))
+        val etc01 = extractProfAndCleanName("Ética (Janaina)")
+        list.add(SubjectEntity(code = "ETC01", name = etc01.first, professor = etc01.second, semester = 6, dayOfWeek = 2, daysOfWeek = "2", classesPerDay = 2, maxAbsences = 10))
+        val mnd01 = extractProfAndCleanName("Mineração de Dados (Edson)")
+        list.add(SubjectEntity(code = "MND01", name = mnd01.first, professor = mnd01.second, semester = 6, dayOfWeek = 2, daysOfWeek = "2,3", classesPerDay = 2, maxAbsences = 20))
+        val qts01 = extractProfAndCleanName("Qual. e Testes SW (Edson)")
+        list.add(SubjectEntity(code = "QTS01", name = qts01.first, professor = qts01.second, semester = 6, dayOfWeek = 3, daysOfWeek = "3", classesPerDay = 4, maxAbsences = 20))
+        val cn201 = extractProfAndCleanName("Comp. Nuvem II (Renan)")
+        list.add(SubjectEntity(code = "CN201", name = cn201.first, professor = cn201.second, semester = 6, dayOfWeek = 4, daysOfWeek = "4", classesPerDay = 4, maxAbsences = 20))
+        val pln01 = extractProfAndCleanName("PLN (Andrea)")
+        list.add(SubjectEntity(code = "PLN01", name = pln01.first, professor = pln01.second, semester = 6, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 4, maxAbsences = 20))
+        val ing04 = extractProfAndCleanName("Inglês IV (Luciano / Valteir)")
+        list.add(SubjectEntity(code = "ING04", name = ing04.first, professor = ing04.second, semester = 6, dayOfWeek = 5, daysOfWeek = "5", classesPerDay = 2, maxAbsences = 10))
 
         return list
     }

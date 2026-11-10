@@ -25,6 +25,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
@@ -173,7 +175,7 @@ fun HomeScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Índice de Risco de DP",
+                            text = "Minhas Disciplinas",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -191,11 +193,11 @@ fun HomeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.PostAdd,
-                            contentDescription = "Adicionar DP",
+                            contentDescription = "Adicionar Matéria",
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "+ Matéria (DP)", fontSize = 12.sp)
+                        Text(text = "+ Matéria Extra", fontSize = 12.sp)
                     }
                 }
             }
@@ -635,17 +637,27 @@ private fun SubjectItemCard(
                         Text(
                             text = subject.name,
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = "Prof: ${subject.professor} • ${subject.classTime}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (subject.professor.isNotBlank()) {
+                        Text(
+                            text = "Prof. ${subject.professor} • ${subject.classTime}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        Text(
+                            text = "Sem docente • ${subject.classTime}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
@@ -669,22 +681,9 @@ private fun SubjectItemCard(
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = WarningYellow,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-
-                        if (subject.isCustomized) {
-                            Surface(
-                                shape = RoundedCornerShape(4.dp),
-                                color = HolidayBlue.copy(alpha = 0.2f)
-                            ) {
-                                Text(
-                                    text = "CUSTOM",
-                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = HolidayBlue,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp,
+                                    maxLines = 1
                                 )
                             }
                         }
@@ -823,16 +822,17 @@ private fun AddDpSubjectDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Adicionar Matéria de DP / Contraturno 🎒",
+                text = "Incluir Matéria Extra 🎒",
                 fontWeight = FontWeight.Bold
             )
         },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = "Cadastre disciplinas que você está cursando de outros semestres. Elas ficarão salvas e protegidas no SQLite.",
+                    text = "Puxe uma matéria de outro semestre do catálogo (Adiantamento / Fora de Fase) ou cadastre manualmente.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -840,7 +840,7 @@ private fun AddDpSubjectDialog(
                 OutlinedTextField(
                     value = code,
                     onValueChange = { code = it },
-                    label = { Text("Código (Ex: IBD002 ou DP01)") },
+                    label = { Text("Código (Ex: IBD002)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -858,15 +858,30 @@ private fun AddDpSubjectDialog(
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold
                 )
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    (1..6).forEach { sem ->
+                    (1..3).forEach { sem ->
                         FilterChip(
                             selected = targetSemester == sem,
                             onClick = { targetSemester = sem },
-                            label = { Text("${sem}º") }
+                            label = { Text("${sem}º") },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    (4..6).forEach { sem ->
+                        FilterChip(
+                            selected = targetSemester == sem,
+                            onClick = { targetSemester = sem },
+                            label = { Text("${sem}º") },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -876,16 +891,21 @@ private fun AddDpSubjectDialog(
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    days.forEach { (dInt, dName) ->
-                        FilterChip(
-                            selected = dayOfWeek == dInt,
-                            onClick = { dayOfWeek = dInt },
-                            label = { Text(dName.take(3)) }
-                        )
+                
+                val daysChunked = days.chunked(3)
+                daysChunked.forEach { rowDays ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        rowDays.forEach { (dInt, dName) ->
+                            FilterChip(
+                                selected = dayOfWeek == dInt,
+                                onClick = { dayOfWeek = dInt },
+                                label = { Text(dName.take(3)) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
 
@@ -894,19 +914,21 @@ private fun AddDpSubjectDialog(
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     FilterChip(
                         selected = is80Hours,
                         onClick = { is80Hours = true },
-                        label = { Text("80h (4 aulas/dia • Max 20 faltas)") }
+                        label = { Text("80h (4 aulas/dia • Máx 20 faltas)") },
+                        modifier = Modifier.fillMaxWidth()
                     )
                     FilterChip(
                         selected = !is80Hours,
                         onClick = { is80Hours = false },
-                        label = { Text("40h (2 aulas/dia • Max 10 faltas)") }
+                        label = { Text("40h (2 aulas/dia • Máx 10 faltas)") },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -923,7 +945,7 @@ private fun AddDpSubjectDialog(
                 },
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("Adicionar DP")
+                Text("Adicionar")
             }
         },
         dismissButton = {

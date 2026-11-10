@@ -30,7 +30,7 @@ fun EditSubjectDialog(
     onDismiss: () -> Unit,
     onSave: (id: Long, professor: String, classTime: String, daysOfWeek: String, absences: Int) -> Unit
 ) {
-    var professor by remember { mutableStateOf(subject.professor) }
+    var professor by remember { mutableStateOf(if (subject.professor == "Docente não definido") "" else subject.professor) }
     var classTime by remember { mutableStateOf(subject.classTime) }
     var absences by remember { mutableIntStateOf(subject.currentAbsences) }
 
@@ -66,6 +66,7 @@ fun EditSubjectDialog(
                     value = professor,
                     onValueChange = { professor = it },
                     label = { Text("Nome do Professor") },
+                    placeholder = { Text("Digite o nome do docente") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -73,7 +74,8 @@ fun EditSubjectDialog(
                 OutlinedTextField(
                     value = classTime,
                     onValueChange = { classTime = it },
-                    label = { Text("Horário (Ex: 19:00 - 22:30)") },
+                    label = { Text("Horário") },
+                    placeholder = { Text("Ex: 19:00 - 22:30") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
