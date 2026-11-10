@@ -49,6 +49,9 @@ data class SubjectDto(
     val classesPerDay: Int = 4,
 
     @SerializedName("maxAbsences")
-    val maxAbsences: Int = 20
+    val maxAbsences: Int = 20,
+    
+    @SerializedName("isExtension")
+    val isExtension: Boolean = false
 )
 

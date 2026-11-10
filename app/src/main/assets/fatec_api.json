@@ -121,7 +121,8 @@
         "name": "Eng. Software I (Rháleff)",
         "dayOfWeek": 4,
         "classesPerDay": 4,
-        "maxAbsences": 20
+        "maxAbsences": 20,
+        "isExtension": true
       },
       {
         "code": "DDG01",
@@ -137,7 +138,8 @@
         "name": "Eng Software II (Luiz Antonio / Marco A)",
         "dayOfWeek": 1,
         "classesPerDay": 4,
-        "maxAbsences": 20
+        "maxAbsences": 20,
+        "isExtension": true
       },
       {
         "code": "EDD01",
@@ -195,7 +197,8 @@
         "name": "Gestão Ágil (Bruno)",
         "dayOfWeek": 1,
         "classesPerDay": 4,
-        "maxAbsences": 20
+        "maxAbsences": 20,
+        "isExtension": true
       },
       {
         "code": "BDN01",
@@ -246,7 +249,8 @@
         "name": "Lab. Des. Web (Edson)",
         "dayOfWeek": 2,
         "classesPerDay": 4,
-        "maxAbsences": 20
+        "maxAbsences": 20,
+        "isExtension": true
       },
       {
         "code": "PDM01",
@@ -318,7 +322,8 @@
         "name": "Lab. de Des. p/ Disp. Móveis (Carlo Ronny)",
         "dayOfWeek": 3,
         "classesPerDay": 4,
-        "maxAbsences": 20
+        "maxAbsences": 20,
+        "isExtension": true
       },
       {
         "code": "PDM03",
@@ -355,7 +360,8 @@
         "name": "Lab. Desenv. Multip. (Rafael Guem / Renan)",
         "dayOfWeek": 1,
         "classesPerDay": 4,
-        "maxAbsences": 20
+        "maxAbsences": 20,
+        "isExtension": true
       },
       {
         "code": "ETC01",

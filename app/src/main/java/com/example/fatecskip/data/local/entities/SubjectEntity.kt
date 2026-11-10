@@ -21,7 +21,9 @@ data class SubjectEntity(
     val currentAbsences: Int = 0,
     val maxAbsences: Int = 20,
     val isCustomized: Boolean = false,
-    val isExtension: Boolean = false
+    val isExtension: Boolean = false,
+    val professor: String = "Docente não definido",
+    val classTime: String = "19:00 - 22:30"
 ) {
     /**
      * Verifica se a matéria tem aulas no dia da semana informado (1 = Seg .. 6 = Sáb)

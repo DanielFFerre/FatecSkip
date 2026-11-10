@@ -52,7 +52,7 @@ sealed class SkipVerdict(
     ) : SkipVerdict(
         title = "PROIBIDO FALTAR!",
         description = customMessage,
-        badgeText = "RISCO DE DP NO SIGA",
+        badgeText = "REPROVAÇÃO POR FALTA",
         containerColor = Color(0xFFC2185B), // Vermelho / Vinho de perigo
         contentColor = Color.White,
         emoji = "💀"
