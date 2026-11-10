@@ -96,7 +96,7 @@ fun AppNavHost(
         factory = SettingsViewModel.Factory(repository, preferencesRepository)
     )
     val onboardingViewModel: OnboardingViewModel = viewModel(
-        factory = OnboardingViewModel.Factory(preferencesRepository)
+        factory = OnboardingViewModel.Factory(preferencesRepository, repository)
     )
 
     val bottomNavItems = listOf(
