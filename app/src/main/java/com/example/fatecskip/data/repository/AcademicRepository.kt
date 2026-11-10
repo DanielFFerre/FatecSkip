@@ -90,6 +90,58 @@ class AcademicRepository(
         return subjectDao.insertSubject(subject)
     }
 
+    suspend fun updateSubjectDetails(
+        subjectId: Long,
+        professor: String,
+        classTime: String,
+        daysOfWeek: String,
+        currentAbsences: Int
+    ) {
+        val subject = subjectDao.getSubjectById(subjectId)
+        if (subject != null) {
+            val updated = subject.copy(
+                professor = professor.trim(),
+                classTime = classTime.trim(),
+                daysOfWeek = daysOfWeek.trim(),
+                currentAbsences = currentAbsences,
+                isCustomized = true
+            )
+            subjectDao.updateSubject(updated)
+        }
+    }
+
+    /**
+     * Adiciona matéria de outro semestre ("Grade Flexível/Fora de fase") na grade atual
+     */
+    suspend fun addExtraSubject(
+        code: String,
+        name: String,
+        targetSemester: Int,
+        dayOfWeek: Int,
+        classesPerDay: Int,
+        maxAbsences: Int,
+        isExtension: Boolean
+    ): Long {
+        // Verifica se a matéria já existe naquele semestre e dia para não duplicar
+        val existing = subjectDao.getSubjectsBySemesterAndDay(targetSemester, dayOfWeek)
+        val isDuplicate = existing.any { it.code.equals(code, ignoreCase = true) || it.name.equals(name, ignoreCase = true) }
+        
+        if (isDuplicate) return -1L
+
+        val subject = SubjectEntity(
+            code = code.uppercase().trim(),
+            name = name.trim(),
+            semester = targetSemester,
+            dayOfWeek = dayOfWeek,
+            classesPerDay = classesPerDay,
+            currentAbsences = 0,
+            maxAbsences = maxAbsences,
+            isCustomized = true,
+            isExtension = isExtension
+        )
+        return subjectDao.insertSubject(subject)
+    }
+
     suspend fun getRandomExcuse(): String {
         val dbExcuse = excuseDao.getRandomExcuse()?.text
         if (!dbExcuse.isNullOrBlank()) return dbExcuse
