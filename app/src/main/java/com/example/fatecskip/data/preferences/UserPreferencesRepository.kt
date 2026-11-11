@@ -28,6 +28,10 @@ class UserPreferencesRepository(private val context: Context) {
         val KEY_NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val KEY_API_URL = stringPreferencesKey("api_url")
         val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val KEY_ALARM_ENABLED = booleanPreferencesKey("alarm_enabled")
+        val KEY_ALARM_HOUR = intPreferencesKey("alarm_hour")
+        val KEY_ALARM_MINUTE = intPreferencesKey("alarm_minute")
+        val KEY_NIGHT_PREVIEW_ENABLED = booleanPreferencesKey("night_preview_enabled")
 
         const val DEFAULT_SEMESTER = 1
         const val DEFAULT_COURAGE_LEVEL = 0.75f // Estudante Médio
@@ -88,6 +92,30 @@ class UserPreferencesRepository(private val context: Context) {
             preferences[KEY_ONBOARDING_COMPLETED] ?: false
         }
 
+    val alarmEnabledFlow: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences -> preferences[KEY_ALARM_ENABLED] ?: false }
+
+    val alarmHourFlow: Flow<Int> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences -> preferences[KEY_ALARM_HOUR] ?: 6 }
+
+    val alarmMinuteFlow: Flow<Int> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences -> preferences[KEY_ALARM_MINUTE] ?: 30 }
+
+    val nightPreviewEnabledFlow: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences -> preferences[KEY_NIGHT_PREVIEW_ENABLED] ?: false }
+
     suspend fun setOnboardingCompleted(completed: Boolean = true) {
         dataStore.edit { preferences ->
             preferences[KEY_ONBOARDING_COMPLETED] = completed
@@ -123,5 +151,30 @@ class UserPreferencesRepository(private val context: Context) {
             preferences[KEY_API_URL] = url
         }
     }
-}
 
+    suspend fun setAlarmEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_ALARM_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setAlarmHour(hour: Int) {
+        require(hour in 0..23) { "A hora do alarme deve estar entre 0 e 23." }
+        dataStore.edit { preferences ->
+            preferences[KEY_ALARM_HOUR] = hour
+        }
+    }
+
+    suspend fun setAlarmMinute(minute: Int) {
+        require(minute in 0..59) { "O minuto do alarme deve estar entre 0 e 59." }
+        dataStore.edit { preferences ->
+            preferences[KEY_ALARM_MINUTE] = minute
+        }
+    }
+
+    suspend fun setNightPreviewEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_NIGHT_PREVIEW_ENABLED] = enabled
+        }
+    }
+}

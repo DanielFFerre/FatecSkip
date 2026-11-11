@@ -54,6 +54,25 @@ class AcademicRepository(
         subjectDao.updateSubject(updated)
     }
 
+    suspend fun registerAbsenceForToday(
+        semester: Int,
+        date: LocalDate = LocalDate.now()
+    ): Int {
+        val dayOfWeek = date.dayOfWeek.value
+        val subjectsToday = subjectDao.getSubjectsBySemesterList(semester)
+            .filter { it.isClassOnDay(dayOfWeek) }
+
+        subjectsToday.forEach { subject ->
+            val updated = subject.copy(
+                currentAbsences = (subject.currentAbsences + subject.classesPerDay)
+                    .coerceAtMost(subject.maxAbsences + 20)
+            )
+            subjectDao.updateSubject(updated)
+        }
+
+        return subjectsToday.size
+    }
+
     suspend fun addEvent(title: String, date: String, type: String, isCritical: Boolean): Long {
         val event = EventEntity(
             title = title.trim(),
