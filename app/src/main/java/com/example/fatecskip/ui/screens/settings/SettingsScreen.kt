@@ -1,9 +1,16 @@
 package com.example.fatecskip.ui.screens.settings
 
 import android.Manifest
+import android.app.AlarmManager
+import android.app.TimePickerDialog
+import android.content.Intent
 import android.os.Build
+import android.provider.Settings
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -66,6 +73,10 @@ fun SettingsScreen(
     val semester by viewModel.selectedSemester.collectAsState()
     val courageLevel by viewModel.courageLevel.collectAsState()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
+    val alarmEnabled by viewModel.alarmEnabled.collectAsState()
+    val alarmHour by viewModel.alarmHour.collectAsState()
+    val alarmMinute by viewModel.alarmMinute.collectAsState()
+    val nightPreviewEnabled by viewModel.nightPreviewEnabled.collectAsState()
     val apiUrl by viewModel.apiUrl.collectAsState()
     val isSyncing by viewModel.isSyncing.collectAsState()
     val feedbackMessage by viewModel.feedbackMessage.collectAsState()
@@ -84,6 +95,15 @@ fun SettingsScreen(
             viewModel.triggerTestNotification(context, nicknameInput)
         }
     }
+    val alarmTestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { viewModel.triggerTestAlarm(context) }
+    val previewPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { viewModel.triggerTestNightPreview(context) }
+    val exactAlarmPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { viewModel.refreshAlarmSchedule(context) }
 
     LaunchedEffect(feedbackMessage) {
         feedbackMessage?.let {
@@ -333,6 +353,146 @@ fun SettingsScreen(
                 }
             }
 
+            item {
+                val canScheduleExactAlarms = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+                    context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "⏰ Despertador do Oráculo & Preview",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Alarme Matinal Real", fontWeight = FontWeight.SemiBold)
+                                Text(
+                                    "Desperta com o veredito do dia.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = alarmEnabled,
+                                onCheckedChange = { viewModel.updateAlarmEnabled(context, it) }
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                TimePickerDialog(
+                                    context,
+                                    { _, hour, minute ->
+                                        viewModel.updateAlarmTime(context, hour, minute)
+                                    },
+                                    alarmHour,
+                                    alarmMinute,
+                                    true
+                                ).show()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = alarmEnabled,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Horário do alarme: %02d:%02d".format(alarmHour, alarmMinute))
+                        }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !canScheduleExactAlarms) {
+                            Text(
+                                "Sem a permissão de alarmes exatos, o sistema pode atrasar o toque.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            OutlinedButton(
+                                onClick = {
+                                    val intent = Intent(
+                                        Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                                        Uri.parse("package:${context.packageName}")
+                                    )
+                                    exactAlarmPermissionLauncher.launch(intent)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Permitir horário exato")
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    alarmTestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    viewModel.triggerTestAlarm(context)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Testar Alarme Real (5s)")
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Preview na Noite Anterior", fontWeight = FontWeight.SemiBold)
+                                Text(
+                                    "Resumo do dia seguinte às 21:00.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = nightPreviewEnabled,
+                                onCheckedChange = { viewModel.updateNightPreviewEnabled(context, it) }
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    previewPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    viewModel.triggerTestNightPreview(context)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Testar Preview de Amanhã (5s)")
+                        }
+                    }
+                }
+            }
+
             // Sincronização com a API REST
             item {
                 Card(
@@ -435,4 +595,3 @@ fun SettingsScreen(
         }
     }
 }
-

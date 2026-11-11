@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.fatecskip.data.preferences.UserPreferencesRepository
 import com.example.fatecskip.data.repository.AcademicRepository
+import com.example.fatecskip.worker.AlarmScheduler
 import com.example.fatecskip.worker.DailyCheckWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,6 +35,18 @@ class SettingsViewModel(
 
     val apiUrl: StateFlow<String> = preferencesRepository.apiUrlFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserPreferencesRepository.DEFAULT_API_URL)
+
+    val alarmEnabled: StateFlow<Boolean> = preferencesRepository.alarmEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val alarmHour: StateFlow<Int> = preferencesRepository.alarmHourFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 6)
+
+    val alarmMinute: StateFlow<Int> = preferencesRepository.alarmMinuteFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 30)
+
+    val nightPreviewEnabled: StateFlow<Boolean> = preferencesRepository.nightPreviewEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
@@ -111,6 +124,96 @@ class SettingsViewModel(
         }
     }
 
+    fun updateAlarmEnabled(context: Context, enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setAlarmEnabled(enabled)
+            if (enabled) {
+                val exact = AlarmScheduler.scheduleDailyAlarm(
+                    context,
+                    preferencesRepository.alarmHourFlow.first(),
+                    preferencesRepository.alarmMinuteFlow.first()
+                )
+                _feedbackMessage.value = if (exact) {
+                    "⏰ Despertador ativado com horário exato."
+                } else {
+                    "⏰ Despertador ativado; conceda permissão para maior precisão."
+                }
+            } else {
+                AlarmScheduler.cancelAlarm(context)
+                _feedbackMessage.value = "Despertador matinal desativado."
+            }
+        }
+    }
+
+    fun updateAlarmTime(context: Context, hour: Int, minute: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setAlarmHour(hour)
+            preferencesRepository.setAlarmMinute(minute)
+            if (alarmEnabled.value) {
+                val exact = AlarmScheduler.scheduleDailyAlarm(context, hour, minute)
+                _feedbackMessage.value = if (exact) {
+                    "Alarme diário atualizado para %02d:%02d.".format(hour, minute)
+                } else {
+                    "Alarme atualizado para %02d:%02d, mas sem precisão exata.".format(hour, minute)
+                }
+            }
+        }
+    }
+
+    fun updateNightPreviewEnabled(context: Context, enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setNightPreviewEnabled(enabled)
+            if (enabled) {
+                val exact = AlarmScheduler.scheduleNightPreview(context)
+                _feedbackMessage.value = if (exact) {
+                    "🌙 Preview noturno ativado para as 21:00."
+                } else {
+                    "🌙 Preview ativado para as 21:00, sem precisão exata."
+                }
+            } else {
+                AlarmScheduler.cancelNightPreview(context)
+                _feedbackMessage.value = "Preview noturno desativado."
+            }
+        }
+    }
+
+    fun triggerTestAlarm(context: Context) {
+        viewModelScope.launch {
+            val exact = AlarmScheduler.scheduleTestAlarmInSeconds(context, 5)
+            _feedbackMessage.value = if (exact) {
+                "⚡ Alarme real agendado para tocar em 5 segundos."
+            } else {
+                "⚡ Alarme de teste agendado sem precisão exata."
+            }
+        }
+    }
+
+    fun triggerTestNightPreview(context: Context) {
+        val exact = AlarmScheduler.scheduleTestNightPreviewInSeconds(context, 5)
+        _feedbackMessage.value = if (exact) {
+            "🌙 Preview de amanhã agendado para daqui a 5 segundos."
+        } else {
+            "🌙 Preview de teste agendado sem precisão exata."
+        }
+    }
+
+    fun refreshAlarmSchedule(context: Context) {
+        viewModelScope.launch {
+            if (alarmEnabled.value) {
+                val exact = AlarmScheduler.scheduleDailyAlarm(
+                    context,
+                    alarmHour.value,
+                    alarmMinute.value
+                )
+                _feedbackMessage.value = if (exact) {
+                    "Permissão concedida. Despertador exato ativado."
+                } else {
+                    "O sistema ainda não concedeu permissão para alarmes exatos."
+                }
+            }
+        }
+    }
+
     fun resetOnboarding() {
         viewModelScope.launch {
             preferencesRepository.setOnboardingCompleted(false)
@@ -132,4 +235,3 @@ class SettingsViewModel(
         }
     }
 }
-
