@@ -1,6 +1,7 @@
 package com.example.fatecskip.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -9,6 +10,8 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.example.fatecskip.data.local.AppDatabase
 import com.example.fatecskip.data.preferences.UserPreferencesRepository
+import com.example.fatecskip.FatecSkipApp
+import com.example.fatecskip.domain.model.SkipVerdict
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -35,6 +38,33 @@ class DailyCheckWorker(
             val tomorrow = LocalDate.now().plusDays(1)
             val tomorrowStr = tomorrow.format(DateTimeFormatter.ISO_LOCAL_DATE)
             val tomorrowDayOfWeek = tomorrow.dayOfWeek.value
+
+            if (inputData.getBoolean(IS_NIGHT_PREVIEW, false)) {
+                val verdict = FatecSkipApp.instance.repository.evaluateSkipVerdict(
+                    date = tomorrow,
+                    semester = semester,
+                    courageLevel = courageLevel
+                )
+                val summary = when (verdict) {
+                    is SkipVerdict.ForbiddenCriticalEvent ->
+                        "🚨 Dia de evento crítico: ${verdict.eventTitle}. Nada de faltar!"
+                    is SkipVerdict.ForbiddenAbsenceLimit ->
+                        "💀 Faltar em ${verdict.subjectName} ultrapassa o limite e bloqueia o Exame Final."
+                    is SkipVerdict.WarningSafetyMargin ->
+                        "⚠️ Atenção às faltas em ${verdict.subjectName}: você está na margem de risco."
+                    is SkipVerdict.Allowed ->
+                        "✅ Aulas sem eventos críticos e faltas dentro da margem de segurança."
+                    is SkipVerdict.NoClassOrHoliday ->
+                        "🛌 ${verdict.customMessage}"
+                }
+                NotificationHelper.showNotification(
+                    context = context,
+                    title = "🌙 Preview de Amanhã",
+                    message = "🌙 Preview de Amanhã: $summary",
+                    notificationId = 1010
+                )
+                return Result.success()
+            }
 
             // 1. Checa eventos críticos amanhã
             val criticalEvents = database.eventDao().getCriticalEventsByDate(tomorrowStr)
@@ -91,12 +121,14 @@ class DailyCheckWorker(
 
             Result.success()
         } catch (e: Exception) {
+            Log.e("DailyCheckWorker", "Falha ao gerar a notificação diária do Oráculo.", e)
             Result.failure()
         }
     }
 
     companion object {
         private const val PERIODIC_WORK_TAG = "fatec_daily_check_work"
+        const val IS_NIGHT_PREVIEW = "IS_NIGHT_PREVIEW"
 
         fun schedulePeriodicCheck(context: Context) {
             val workRequest = PeriodicWorkRequestBuilder<DailyCheckWorker>(24, TimeUnit.HOURS)
@@ -118,6 +150,6 @@ class DailyCheckWorker(
 
             WorkManager.getInstance(context).enqueue(workRequest)
         }
+
     }
 }
-

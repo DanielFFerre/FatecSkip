@@ -6,7 +6,13 @@ import com.example.fatecskip.data.preferences.UserPreferencesRepository
 import com.example.fatecskip.data.remote.FatecApiService
 import com.example.fatecskip.data.repository.AcademicRepository
 import com.example.fatecskip.worker.DailyCheckWorker
+import com.example.fatecskip.worker.AlarmScheduler
 import com.example.fatecskip.worker.NotificationHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 class FatecSkipApp : Application() {
 
@@ -40,6 +46,34 @@ class FatecSkipApp : Application() {
 
         NotificationHelper.createNotificationChannel(this)
         DailyCheckWorker.schedulePeriodicCheck(this)
+        scheduleSavedAlarms()
+    }
+
+    private fun scheduleSavedAlarms() {
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            preferencesRepository.alarmEnabledFlow
+                .combine(preferencesRepository.alarmHourFlow) { enabled, hour -> enabled to hour }
+                .combine(preferencesRepository.alarmMinuteFlow) { alarm, minute ->
+                    Triple(alarm.first, alarm.second, minute)
+                }
+                .collect { (enabled, hour, minute) ->
+                    if (enabled) {
+                        AlarmScheduler.scheduleDailyAlarm(this@FatecSkipApp, hour, minute)
+                    } else {
+                        AlarmScheduler.cancelAlarm(this@FatecSkipApp)
+                    }
+                }
+        }
+
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            preferencesRepository.nightPreviewEnabledFlow.collect { enabled ->
+                if (enabled) {
+                    AlarmScheduler.scheduleNightPreview(this@FatecSkipApp)
+                } else {
+                    AlarmScheduler.cancelNightPreview(this@FatecSkipApp)
+                }
+            }
+        }
     }
 
     companion object {
@@ -47,4 +81,3 @@ class FatecSkipApp : Application() {
             private set
     }
 }
-
